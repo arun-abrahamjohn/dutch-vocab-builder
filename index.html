@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🇳🇱 Dutch Vocab Builder</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-tertiary: #94a3b8;
+      --border-primary: #e2e8f0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --text-primary: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-tertiary: #64748b;
+        --border-primary: #334155;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg-primary); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // ─── Word list ─────────────────────────────────────────────────────────────
+    const RAW = [
+      ["de","the"],["en","and"],["een","a"],["het","it"],["in","in"],["te","too"],["ik","I"],["hebben","to have"],["hij","he"],["niet","not"],["op","on"],["dat","that"],["voor","before"],["er","there"],["je","you"],["zullen","shall"],["kunnen","can / to be able to"],["haar","her"],["of","or"],["wat","what"],["gaan","to go"],["hem","him"],["komen","to come"],["dan","then"],["zo","so"],["moeten","should"],["mijn","my"],["zij","she"],["deze","this"],["we","we"],["meer","more"],["dit","this"],["maken","to make"],["staan","to stand"],["goed","good"],["ander","other"],["doen","to do"],["me","me"],["u","you (formal)"],["mij","me"],["laten","to let"],["al","already"],["daar","there"],["denken","to think"],["toen","then (past)"],["geven","to give"],["hoe","how"],["nu","now"],["vinden","to find"],["man","man"],["jaar","year"],["hier","here"],["wij","we"],["houden","to keep"],["zitten","to sit"],["hand","hand"],["lang","long"],["twee","two"],["dag","day"],["eerst","first"],["alleen","only"],["brengen","to bring"],["beginnen","to begin"],["zelf","self"],["horen","to hear"],["nieuw","new"],["laat","late"],["voelen","to feel"],["plaats","place"],["leven","life"],["huis","house"],["vallen","to fall"],["moeder","mother"],["spreken","to speak"],["woord","word"],["ja","yes"],["wanneer","when"],["vader","father"],["werk","work"],["elk","each"],["ver","far"],["later","later"],["vertellen","to tell"],["jij","you"],["drie","three"],["oud","old"],["soms","sometimes"],["wereld","world"],["uur","hour"],["naam","name"],["soort","kind"],["werken","to work"],["vol","full"],["welk","which"],["boek","book"],["deur","door"],["ding","thing"],["nee","no"],["water","water"],["feit","fact"],["wachten","to wait"],["leren","to learn"],["open","open"],["probleem","problem"],["groep","group"],["jong","young"],["wit","white"],["zodat","so that"],["lachen","to laugh"],["bed","bed"],["verder","further"],["moment","moment"],["staat","state"],["vriend","friend"],["week","week"],["laatste","last"],["helpen","to help"],["licht","light"],["diep","deep"],["nacht","night"],["langs","along"],["beide","both"],["jullie","you (plural)"],["vrij","free"],["gevoel","feeling"],["half","half"],["tafel","table"],["school","school"],["vier","four"],["dood","death / dead"],["sociaal","social"],["hard","hard"],["wijn","wine"],["maand","month"],["mond","mouth"],["reden","reason"],["voet","foot"],["idee","idea"],["rol","role"],["jou","you"],["antwoord","answer"],["slapen","to sleep"],["plan","plan"],["meestal","mostly"],["straat","street"],["persoon","person"],["schouder","shoulder"],["luisteren","to listen"],["invloed","influence"],["hart","heart"],["zoon","son"],["bezig","busy"],["arm","arm"],["tien","ten"],["los","loose"],["vijf","five"],["minuut","minute"],["liefde","love"],["sommige","some"],["direct","directly"],["relatie","relationship"],["systeem","system"],["proces","process"],["menen","to mean"],["derde","third"],["drinken","to drink"],["contact","contact"],["functie","function"],["warm","warm"],["vinger","finger"],["kleur","color"],["pijn","pain"],["glas","glass"],["artikel","article"],["eind","end"],["persoonlijk","personally"],["rood","red"],["dokter","doctor"],["zee","sea"],["groeien","to grow"],["koud","cold"],["leiden","to lead"],["familie","family"],["periode","period"],["sinds","since"],["resultaat","result"],["normaal","normal"],["rond","round"],["organisatie","organization"],["speciaal","special"],["patiënt","patient"],["broer","brother"],["leveren","to deliver"],["hopen","to hope"],["totaal","total"],["zes","six"],["blauw","blue"],["stap","step"],["karakter","character"],["theorie","theory"],["bloed","blood"],["beter","better"],["dochter","daughter"],["stappen","to step"],["droom","dream"],["meter","meter"],["steen","stone"],["hulp","help"],["rest","rest"],["muziek","music"],["maaltijd","meal"],["openen","to open"],["bank","bank"],["papier","paper"],["hoop","hope"],["minister","minister"],["wind","wind"],["koffie","coffee"],["stoppen","to stop"],["oor","ear"],["informatie","information"],["methode","method"],["lip","lip"],["positie","position"],["alle","all"],["enorm","enormous"],["foto","photo"],["film","movie"],["activiteit","activity"],["modern","modern"],["geluk","luck"],["basis","base"],["zuster","sister"],["wakker","awake"],["tante","aunt"],["vuur","fire"],["prijs","price"],["reactie","reaction"],["praktijk","practice"],["neus","nose"],["terrein","terrain"],["koning","king"],["zingen","to sing"],["vliegen","to fly"],["cultuur","culture"],["missen","to miss"],["politie","law enforcement"],["wensen","to wish"],["factor","factor"],["begin","get started"],["succes","good luck"],["kosten","to cost"],["natuur","nature"],["hotel","hotel"],["studie","study"],["vriendelijk","friendly"],["aspect","aspect"],["figuur","figure"],["ontbreken","to lack"],["nationaal","national"],["ziek","sick"],["term","term"],["geef","give"],["rennen","to run"],["Engels","English"],["effect","effect"],["plant","plant"],["product","product"],["slaap","sleep"],["tekst","text"],["knie","knee"],["geboren","born"],["telefoon","phone"],["individueel","individually"],["structuur","structure"],["helft","half"],["trein","train"],["praktisch","practical"],["zomer","summer"],["winnen","to win"],["conclusie","conclusion"],["baby","baby"],["internationaal","international"],["eiland","island"],["meester","master"],["kwaliteit","quality"],["vullen","to fill"],["individu","individual"],["vervullen","to fulfill"],["plaatsen","to place"],["bespreken","to discuss"],["discussie","discussion"],["sigaret","cigarette"],["vis","fish"],["absoluut","absolutely"],["historisch","historical"],["nummer","number"],["schaduw","shadow"],["leiding","leadership"],["kat","cat"],["universiteit","university"],["mezelf","myself"],["fase","phase"],["technisch","technical"],["positief","positive"],["programma","program"],["leider","leader"],["wapen","weapon"],["literatuur","literature"],["brood","bread"],["medisch","medical"],["officier","officer"],["rivier","river"],["dansen","to dance"],["interessant","interesting"],["markt","market"],["officieel","officially"],["baas","boss"],["schoen","shoe"],["boot","boat"],["vloer","floor"],["dromen","to dream"],["winter","winter"],["maan","moon"],["kilometer","kilometers"],["wens","wish"],["miljoen","million"],["seconde","second"],["rijk","rich"],["bier","beer"],["collega","colleague"],["actie","action"],["plezier","pleasure"],["psychologie","psychology"],["techniek","technique"],["vechten","to fight"],["gras","grass"],["pad","path"],["financieel","financial"],["beïnvloeden","to influence"],["actief","active"],["ster","star"],["machine","machine"],["energie","energy"],["gouden","golden"],["nek","neck"],["rusten","to rest"],["auteur","author"],["procent","percent"],["museum","museum"],["realiseren","to realize"],["cultureel","cultural"],["bus","bus"],["directeur","director"],["materiaal","material"],["produceren","to produce"],["veld","field"],["gast","guest"],["dubbel","double"],["zand","sand"],["centrum","centre"],["productie","production"],["westen","west"],["specifiek","specific"],["koel","cool"],["wassen","to wash"],["klant","client"],["tong","tongue"],["argument","argument"],["negatief","negative"],["kaas","cheese"],["titel","title"],["visie","vision"],["persoonlijkheid","personality"],["kust","coast"],["danken","to thank"],["radio","radio"],["wijd","wide"],["jezelf","yourself"],["interesseren","to be interested"],["olie","oil"],["thee","tea"],["risico","risk"],["president","president"],["groen","green"],["honger","hunger"],["traditioneel","traditional"],["adres","address"],["experiment","experiment"],["fundamenteel","fundamental"],["advies","advice"],["klimmen","to climb"],["typisch","typical"],["stijl","style"],["top","top"],["traditie","tradition"],["heet","hot"],["psychologisch","psychological"],["computer","computer"],["generatie","generation"],["bodem","bottom"],["student","student"],["relatief","relatively"],["categorie","category"],["kalm","calm"],["eindigen","to end"],["goederen","goods"],["formuleren","to formulate"],["instrument","instrument"],["klas","class"],["combinatie","combination"],["publiceren","to publish"],["landschap","landscape"],["warmte","warmth"],["televisie","television"],["organiseren","to organize"],["patroon","pattern"],["agent","agent"],["emotie","emotion"],["orgaan","organ"],["provincie","province"],["detail","detail"],["restaurant","restaurant"],["wild","wild"],["pijnlijk","painful"],["station","station"],["klassiek","classic"],["sector","sector"],["eindeloos","endless"],["emotioneel","emotional"],["studeren","to study"],["symbool","symbol"],["luitenant","lieutenant"],["passeren","to pass"],["motief","motive"],["fabriek","factory"],["lijst","list"],["serieus","serious"],["logisch","logical"],["mama","mom"],["vluchten","to flee"],["noorden","north"],["bijten","to bite"],["vorming","formation"],["café","cafe"],["object","object"],["Holland","Holland"],["kamp","camp"],["dun","thin"],["ideaal","ideal"],["juni","June"],["accepteren","to accept"],["initiatief","initiative"],["bitter","bitter"],["verspreiden","to spread"],["verbieden","to forbid"],["consequentie","consequence"],["oktober","October"],["westers","western"],["jongeman","young man"],["hoed","hat"],["zenden","to send"],["zondag","Sunday"],["theoretisch","theoretically"],["psycholoog","psychologist"],["pers","press"],["terras","terrace"],["crisis","crisis"],["pot","pot"],["operatie","operation"],["partner","partner"],["suiker","sugar"],["gemeen","mean"],["plaat","plate"],["stijf","stiff"],["economie","economy"],["bruin","brown"],["sneeuw","snow"],["kruis","cross"],["automatisch","automatically"],["project","project"],["hut","hut"],["fruit","fruit"],["communicatie","communication"],["dom","dumb"],
+      ["boom","tree"],["stoel","chair"],["van","from / of"],["zijn","to be"],["met","with"],["als","if / when"],["maar","but"],["om","around"],["naar","to"],["ook","also"],["bij","at"],["nog","yet"],["tot","until"],["ons","our"],["veel","many"],["mens","human"],["toch","however"],["na","after"],["tijd","time"],["kind","child"],["vrouw","woman"],["oog","eye"],["dus","so"],["heel","very"],["even","for a while"],["zelfs","even"],["hoofd","head"],["vraag","question"],["vaak","often"],["keer","times"],["weg","away"],["zaak","matter / business"],["net","just"],["hoog","high"],["juist","right"],["sterk","strong"],["waar","true"],["deel","part"],["snel","fast"],["mooi","beautiful"],["zin","sentence"],["kort","short"],["vast","fixed"],["stad","city"],["vroeg","early"],["stem","voice"],["kant","side"],["geld","money"],["stuk","piece"],["graag","gladly"],["nou","well"],["pas","only"],["recht","straight"],["zwaar","heavy"],["lid","member"],["eeuw","century"],["opnieuw","again"],["thuis","at home"],["kracht","power"],["ooit","ever"],["kerk","church"],["blik","look"],["kans","opportunity"],["brief","letter"],["beeld","statue"],["zacht","soft"],["macht","power"],["gang","corridor"],["been","leg"],["slecht","bad"],["wet","law"],["bang","afraid"],["dier","animal"],["lucht","sky"],["rug","back"],["angst","fear"],["laag","low"],["raam","window"],["hond","dog"],["stil","quiet"],["doel","target"],["dienst","shift"],["zwart","black"],["dik","fat"],["paard","horse"],["vreemd","strange"],["taal","language"],["volk","people"],["aarde","soil"],["muur","wall"],["raad","advice"],["dorp","village"],["breed","wide"],["leeg","empty"],["lief","sweet"],["klaar","ready"],["zorg","care"],["gauw","soon"],["trap","stairs"],["gek","crazy"],["blad","sheet"],["spel","game"],["zak","bag"],["borst","chest"],["fles","bottle"],["grens","border"],["hoek","corner"],["oom","uncle"],["vlak","flat"],["buurt","neighborhood"],["ruim","spacious"],["blij","happy"],["eten","food"],["stof","dust"],["gat","hole"],["boer","farmer"],["reis","trip"],["druk","busy / pressure"],["schuld","debt"],["leuk","fun"],["bloem","flower"],["huisarts","family doctor"],["fijn","nice"],["links","left"],["plek","place"],["niks","nothing"],["tand","tooth"],["rand","edge"],["bos","forest"],["rust","peace / calm"],["kring","circle"],["grijs","gray"],["haast","rush"],["vlees","meat"],["eis","demand"],["streek","region"],["smaak","taste"],["traan","tear"],["rij","queue"],["spoor","track"],["last","burden"],["smal","narrow"],["slot","lock"],["zwak","weak"],["geur","smell"],["buik","stomach"],["flink","hefty"],["beurt","turn"],["wangen","cheeks"],["rook","smoke"],["slag","battle"],["sfeer","ambiance"],["bron","source"],["droog","dry"],["bord","plate"],["jeugd","youth"],["schoon","clean"],["keel","throat"],["pak","business suit"],["broek","pants"],["golf","wave"],["lichaam","body"],["groei","growth"],["nat","wet"],["duur","expensive"],["feest","party"],["reeks","series"],["strak","tight"],["kleed","carpet"],["vlucht","flight"],["dak","roof"],["hals","neck"],["geel","yellow"],["streng","strict"],["moe","tired"],["geloof","faith"],["tak","branch"],["kwijt","lost"],["zaal","hall"],["greep","grip"],["boos","angry"],["brug","bridge"],["vak","field / subject"],["strand","beach"],["fout","mistake"],["moed","courage"],["jas","jacket"],["trots","pride"],["zoet","sweet"],["fiets","bicycle"],["wolk","cloud"],["kast","closet"],["klap","blow"],["stroom","flow"],["winst","profit"],["knap","good looking"],["straf","punishment"],["langzaam","slow"],["boog","bow"],["brand","fire"],["dwars","transverse"],["kist","chest"],["wand","wall"],["klacht","complaint"],["stuur","steering wheel"],["kern","core"],["leer","leather"],["doos","box"],["vrucht","fruit"],["klein","small"],["makkelijk","easy"],["strekken","to stretch"],["mes","knife"],["maat","measure"],["poot","leg (animal)"],["vent","guy"],["maag","stomach"],["lijk","corpse"],["eer","honor"],
+      ["eigenlijk","actually"],["misschien","maybe"],["over","about"],["zoals","such as"],["zonder","without"],["altijd","always"],["eigen","own"],["alles","everything"],["terwijl","while"],["anders","different"],["terug","back"],["mogelijk","possible"],["geval","case"],["echter","however"],["zeker","sure"],["enkel","only"],["natuurlijk","of course"],["gezicht","face"],["iemand","someone"],["duidelijk","clearly"],["vooral","mostly"],["nodig","required"],["bijna","almost"],["alsof","as if"],["helemaal","completely"],["binnen","within"],["aantal","number of"],["manier","way"],["kamer","room"],["allemaal","all of them"],["zichzelf","himself"],["niemand","nobody"],["daarom","therefore"],["gewoon","just"],["samen","together"],["genoeg","enough"],["daarna","after that"],["verschillende","various"],["volgens","according to"],["moeilijk","difficult"],["weinig","few"],["iedereen","everyone"],["dezelfde","the same"],["gedachte","thought"],["geheel","whole"],["bijvoorbeeld","for example"],["belang","interest"],["ontwikkeling","development"],["zoveel","that much"],["boven","upstairs"],["algemeen","general"],["gebied","area"],["bijzonder","special"],["buiten","outside"],["verhaal","story"],["gevolg","consequence"],["voorbeeld","example"],["vroeger","back in the days"],["bovendien","moreover"],["mogelijkheid","possibility"],["eerder","earlier"],["bepaald","determined"],["vanuit","from"],["tegenover","opposite"],["gebruik","use"],["meteen","right away"],["onderzoek","research"],["beweging","movement"],["waarschijnlijk","probably"],["zaken","affairs"],["aandacht","attention"],["richting","towards"],["verschillen","differences"],["oorlog","war"],["nauwelijks","barely"],["hetzelfde","the same"],["tenslotte","finally"],["menselijk","human"],["verband","bandage"],["plotseling","suddenly"],["inderdaad","indeed"],["maatschappij","society"],["gemakkelijk","easy"],["donker","dark"],["verschil","difference"],["gelukkig","happy"],["betekenis","meaning"],["ervaring","experience"],["begrip","understanding"],["mevrouw","Mrs."],["volgende","next"],["volledig","complete"],["verschillend","different"],["onderwijs","education"],["behoefte","need"],["rustig","quiet"],["eenmaal","once"],["eenvoudig","simple"],["ongeveer","approximately"],["waarde","value"],["ergens","somewhere"],["gesprek","conversation"],["indruk","impression"],["onmiddellijk","immediately"],["werkelijkheid","reality"],["ruimte","space"],["moeite","effort"],["verandering","change"],["geluid","sound"],["gedrag","behaviour"],["bewust","conscious"],["namelijk","namely"],["regel","rule"],["voordat","before"],["gelijk","equal"],["geschiedenis","history"],["kop","headline"],["voldoende","enough"],["overal","everywhere"],["ernstig","serious"],["nogal","quite"],["overigens","moreover"],["omstandigheid","circumstance"],["noch","neither"],["trouwens","besides"],["toekomst","future"],["opeens","suddenly"],["omgeving","surroundings"],["opvatting","view"],["overheid","government"],["afstand","distance"],["vervolgens","thereafter"],["wetenschap","science"],["ondanks","despite"],["eindelijk","finally"],["vrijheid","freedom"],["omhoog","up"],["ziekte","disease"],["hoogte","height"],["beleid","policy"],["schrijver","writer"],["bedrijf","company"],["beneden","down"],["vandaag","today"],["samenleving","society"],["verhouding","ratio"],["houding","attitude"],["gevaar","danger"],["regering","government"],["rekening","bill"],["wetenschappelijk","scientific"],["soldaat","soldier"],["waarheid","truth"],["tenminste","at least"],["prachtig","magnificent"],["beroep","profession"],["poging","attempt"],["oorzaak","cause"],["mening","opinion"],["allen","all"],["gezin","family"],["voorzichtig","careful"],["beslissing","decision"],["uiteindelijk","in the end"],["geleden","ago"],["gelegenheid","opportunity"],["noodzakelijk","necessary"],["aanwezig","present"],["leeftijd","age"],["bellen","to call"],["onmogelijk","impossible"],["stilte","silence"],["behandeling","therapy"],["huwelijk","wedding"],["vorige","last / previous"],["verklaring","statement"],["verleden","past"],["bezoek","visit"],["oplossing","solution"],["doordat","because"],["verlangen","desire"],["bevatten","to contain"],["moeilijkheid","difficulty"],["keuken","kitchen"],["herinnering","memory"],["dagelijks","daily"],["ziekenhuis","hospital"],["zodra","as soon as"],["onderwerp","topic"],["vrijwel","almost"],["blijkbaar","apparently"],["bureau","desk"],["opdracht","assignment"],["gebouw","building"],["uitdrukking","expression"],["zolang","as long as"],["lekker","tasty / nice"],["bestuur","board"],["keuze","choice"],["behalve","except"],["uitspraak","pronunciation"],["nergens","nowhere"],["gezond","healthy"],["voorstel","proposal"],["veilig","safe"],["stijgen","to rise"],["besluit","decision"],["tegenstelling","contrary"],["oordeel","judgment"],["twijfel","doubt"],["glimlach","smile"],["uitsluitend","exclusively"],["wellicht","perhaps"],["spanning","tension"],["arbeid","labor"],["gevaarlijk","dangerous"],["rechter","judge"],["leraar","teacher"],["vriendin","girlfriend"],["zekerheid","security"],["gewoonlijk","usually"],["heerlijk","delicious"],["openbaar","public"],["voordeel","benefit"],["opmerking","comment"],["intussen","meanwhile"],["gezag","authority"],["herhalen","to repeat"],["tevreden","satisfied"],["kantoor","office"],["gedeelte","part"],["afdeling","department"],["maatregel","measure"],["voedsel","food"],["boodschap","message"],["krachtige","powerful"],["vrolijk","cheerful"],["vertrek","departure"],["toevallig","coincidentally"],["uitstekend","excellent"],["bewijs","proof"],["voorkeur","preference"],["achtergrond","background"],["eigenschap","characteristic"],["bezit","possession"],["handeling","act"],["arbeider","worker"],["prettig","pleasant"],["geheim","secret"],["gedicht","poem"],["vijand","enemy"],["verwachting","expectation"],["inmiddels","in the meantime"],["ongetwijfeld","undoubtedly"],["vergadering","meeting"],["buitenlands","foreign"],["opleiding","education"],["verschrikkelijk","terrible"],["ambtenaar","civil servant"],["redelijk","reasonable"],["gewoonte","habit"],["verzoek","request"],["leerling","pupil"],["geweld","violence"],["uitzondering","exception"],["voorwerp","object"],["gunstig","favorable"],["regeling","regulation"],["doelstelling","goal"],["verdriet","sadness"],["dichtbij","nearby"],["afspraak","appointment"],["allebei","both"],["heuvel","hill"],["voorhoofd","forehead"],["vreselijk","horrible"],["vrede","peace"],["godsdienst","religion"],["samenwerking","cooperation"],["spiegel","mirror"],["verstand","wisdom"],["onderscheid","distinction"],["aanval","attack"],["ongeluk","accident"],["sleutel","key"],["koffer","suitcase"],["afscheid","goodbye"],["vereniging","association"],["geweldig","awesome"],["woning","house"],["overeenkomst","agreement"],["voorzitter","chairman"],["milieu","environment"],["kenmerken","characteristics"],["definitief","final"],["nauwkeurig","accurate"],["bijdrage","contribution"],["overleg","consultation"],["verbazing","surprise"],["gordijnen","curtains"],["goedkoop","cheap"],["evenwicht","balance"],["vochtig","moist"],["vergelijking","comparison"],["gezondheid","health"],["gevangenis","prison"],["slaapkamer","bedroom"],["kleren","clothes"],["verbaasd","surprised"],["deken","blanket"],["vreugde","joy"],["gemak","ease"],["kunstenaar","artist"],["burgemeester","mayor"],["verlies","loss"],["burgerlijk","civil"],["lelijk","ugly"],["overig","other / remaining"],["bereid","prepared"],["koningin","queen"],["eigenaar","owner"],["ontmoeting","meeting"],["verslag","report"],["onverwacht","unexpected"],["personeel","staff"],["gezellig","cozy"],["geheugen","memory"],["verdrietig","sad"],["snelheid","speed"],["nuttig","useful"],["schade","damage"],["kapot","broken"],["bescherming","protection"],["noodzaak","need"],["jammer","unfortunately"],["toekomstig","future"],["tijdschrift","magazine"],["verdieping","floor"],["aantrekkelijk","attractive"],["opvoeding","upbringing"],["tegenstander","opponent"],["verantwoordelijkheid","responsibility"],
+    ];
+
+    const seenNl = new Set();
+    const ALL_WORDS = [];
+    for (const [nl, en] of RAW) {
+      if (!seenNl.has(nl)) { seenNl.add(nl); ALL_WORDS.push({ nl, en }); }
+    }
+
+    // ─── Semantic categories for smart distractors ────────────────────────────
+    const VERBS   = new Set(ALL_WORDS.filter(w => w.en.startsWith("to ")).map(w => w.nl));
+    const COLORS  = new Set(["rood","blauw","groen","geel","wit","zwart","bruin","grijs","gouden","paars"]);
+    const NUMBERS = new Set(["twee","drie","vier","vijf","zes","tien","minuut","uur","seconde","kilometer","meter","procent","miljoen"]);
+    const BODY    = new Set(["hand","voet","oog","oor","neus","mond","lip","tong","nek","arm","schouder","knie","vinger","hart","bloed","hoofd","rug","buik","borst","hals","been","tand","keel","wangen","voorhoofd"]);
+    const FAMILY  = new Set(["moeder","vader","broer","zuster","zoon","dochter","tante","oom","kind","vrouw","man","vriend","vriendin","partner","baby","mama","gezin"]);
+    const ADVERBS = new Set(["niet","ook","al","dan","zo","nu","hier","daar","ver","later","eerst","alleen","verder","nog","soms","meer","misschien","eigenlijk","altijd","nooit","bijna","heel","zelfs","ooit","opnieuw","thuis","meteen","plotseling","eindelijk","overal","ergens","nergens","dagelijks","toch","dus","immers","namelijk","trouwens","bovendien","tenslotte","echter","nogal","vrijwel","nauwelijks","ongeveer","uiteindelijk","inderdaad","ongetwijfeld","inmiddels","intussen","toevallig","uitsluitend","wellicht"]);
+
+    function getCategory(w) {
+      if (VERBS.has(w.nl))   return "verb";
+      if (COLORS.has(w.nl))  return "color";
+      if (NUMBERS.has(w.nl)) return "number";
+      if (BODY.has(w.nl))    return "body";
+      if (FAMILY.has(w.nl))  return "family";
+      if (ADVERBS.has(w.nl)) return "adverb";
+      return "noun";
+    }
+
+    function getDistractors(word, n = 3) {
+      const cat  = getCategory(word);
+      const same  = shuffle(ALL_WORDS.filter(w => w.nl !== word.nl && getCategory(w) === cat));
+      const other = shuffle(ALL_WORDS.filter(w => w.nl !== word.nl && getCategory(w) !== cat));
+      return [...same, ...other].slice(0, n).map(w => w.en);
+    }
+
+    // ─── SM-2 algorithm ───────────────────────────────────────────────────────
+    // phase recog: MCQ, needs 2 consecutive correct → promotes to prod
+    // phase prod:  type the Dutch word, SM-2 interval growth
+    // ef starts at 2.5, min 1.3
+
+    const today    = () => new Date().toISOString().slice(0, 10);
+    const addDays  = (d, n) => { const dt = new Date(d); dt.setDate(dt.getDate() + n); return dt.toISOString().slice(0, 10); };
+    const daysBetween = (a, b) => Math.round((new Date(b) - new Date(a)) / 86400000);
+
+    function newCard(nl) {
+      return { nl, phase: "recog", interval: 1, ef: 2.5, dueDate: today(), lapses: 0, recogStreak: 0 };
+    }
+
+    function sm2(card, q) {
+      let { interval, ef } = card;
+      const newEf = Math.max(1.3, ef + 0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
+      let newInterval;
+      if (q < 3) {
+        newInterval = 1;
+      } else {
+        if (interval === 1)      newInterval = 4;
+        else if (interval <= 4)  newInterval = 6;
+        else                     newInterval = Math.round(interval * newEf);
+      }
+      return { ef: newEf, interval: newInterval, dueDate: addDays(today(), newInterval) };
+    }
+
+    // ─── Storage (localStorage) ───────────────────────────────────────────────
+    const STORAGE_KEY    = "dutch-sm2-v1";
+    const NEW_PER_SESSION = 15;
+
+    async function load() {
+      try {
+        const r = localStorage.getItem(STORAGE_KEY);
+        return r ? JSON.parse(r) : null;
+      } catch { return null; }
+    }
+
+    async function save(cards) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+      } catch (e) { console.error(e); }
+    }
+
+    function initCards(saved) {
+      const savedMap = new Map((saved || []).map(c => [c.nl, c]));
+      return ALL_WORDS.map(w => savedMap.get(w.nl) || newCard(w.nl));
+    }
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function normalize(s) {
+      return s.trim().toLowerCase().replace(/[^a-záàäéèëíìïóòöúùüijn ]/g, "");
+    }
+
+    function wordFor(nl) {
+      return ALL_WORDS.find(w => w.nl === nl);
+    }
+
+    function buildSessionQueue(cards) {
+      const t = today();
+      const due = cards
+        .filter(c => c.dueDate <= t)
+        .sort((a, b) => (a.dueDate < b.dueDate ? -1 : 1));
+
+      const reviews  = due.filter(c => !(c.recogStreak === 0 && c.lapses === 0 && c.phase === "recog"));
+      const newCards  = due.filter(c =>   c.recogStreak === 0 && c.lapses === 0 && c.phase === "recog");
+      const sessionNew = newCards.slice(0, NEW_PER_SESSION);
+
+      // interleave: 2 reviews per 1 new card
+      const queue = [];
+      let ri = 0, ni = 0;
+      while (ri < reviews.length || ni < sessionNew.length) {
+        if (ri < reviews.length) queue.push(reviews[ri++]);
+        if (ri < reviews.length) queue.push(reviews[ri++]);
+        if (ni < sessionNew.length) queue.push(sessionNew[ni++]);
+      }
+      return queue;
+    }
+
+    // ─── App ──────────────────────────────────────────────────────────────────
+    function App() {
+      const [allCards,     setAllCards]     = useState(null);
+      const [queue,        setQueue]        = useState([]);
+      const [current,      setCurrent]      = useState(null);
+      const [options,      setOptions]      = useState([]);
+      const [selected,     setSelected]     = useState(null);
+      const [typed,        setTyped]        = useState("");
+      const [submitted,    setSubmitted]    = useState(false);
+      const [isCorrect,    setIsCorrect]    = useState(null);
+      const [sessionStats, setSessionStats] = useState({ correct: 0, seen: 0 });
+      const [sessionDone,  setSessionDone]  = useState(false);
+      const [loading,      setLoading]      = useState(true);
+      const [saveIndicator,setSaveIndicator]= useState("");
+      const inputRef  = useRef(null);
+      const cardsRef  = useRef(null);
+
+      useEffect(() => {
+        load().then(saved => {
+          const cards = initCards(saved);
+          cardsRef.current = cards;
+          setAllCards(cards);
+          setLoading(false);
+          launchSession(cards);
+        });
+      }, []);
+
+      const launchSession = (cards) => {
+        const q = buildSessionQueue(cards);
+        setQueue(q);
+        setSessionStats({ correct: 0, seen: 0 });
+        setSessionDone(false);
+        if (q.length === 0) { setSessionDone(true); return; }
+        showCard(q[0], cards);
+      };
+
+      const showCard = (cardData, cards) => {
+        const word = wordFor(cardData.nl);
+        setCurrent(cardData);
+        setSelected(null);
+        setTyped("");
+        setSubmitted(false);
+        setIsCorrect(null);
+        if (cardData.phase === "recog") {
+          setOptions(shuffle([word.en, ...getDistractors(word)]));
+        } else {
+          setOptions([]);
+          setTimeout(() => inputRef.current?.focus(), 60);
+        }
+      };
+
+      const persist = (updated) => {
+        cardsRef.current = updated;
+        save(updated).then(() => {
+          setSaveIndicator("Saved ✓");
+          setTimeout(() => setSaveIndicator(""), 1200);
+        });
+      };
+
+      const updateCard = (cards, nl, updater) => cards.map(c => c.nl === nl ? updater(c) : c);
+
+      const advance = (nextQueue, updatedCards) => {
+        if (nextQueue.length === 0) { setSessionDone(true); return; }
+        const next = updatedCards.find(c => c.nl === nextQueue[0].nl) || nextQueue[0];
+        showCard(next, updatedCards);
+      };
+
+      const handleRecog = (opt) => {
+        if (selected !== null) return;
+        const word = wordFor(current.nl);
+        const correct = opt === word.en;
+        setSelected(opt);
+        setIsCorrect(correct);
+        setSessionStats(s => ({ seen: s.seen + 1, correct: s.correct + (correct ? 1 : 0) }));
+
+        setAllCards(prev => {
+          const updated = updateCard(prev, current.nl, c => {
+            if (correct) {
+              const newStreak = c.recogStreak + 1;
+              if (newStreak >= 2) {
+                return { ...c, recogStreak: newStreak, phase: "prod", interval: 1, dueDate: addDays(today(), 1) };
+              }
+              return { ...c, recogStreak: newStreak, dueDate: addDays(today(), 1) };
+            } else {
+              return { ...c, recogStreak: 0, dueDate: addDays(today(), 1) };
+            }
+          });
+          persist(updated);
+          setQueue(q => {
+            const next = q.slice(1);
+            if (!correct) next.splice(Math.min(4, next.length), 0, updated.find(c => c.nl === current.nl));
+            return next;
+          });
+          return updated;
+        });
+        if (correct) setTimeout(handleNextCard, 750);
+      };
+
+      const handleProd = () => {
+        if (submitted) return;
+        const word = wordFor(current.nl);
+        const correct = normalize(typed) === normalize(word.nl);
+        setSubmitted(true);
+        setIsCorrect(correct);
+        setSessionStats(s => ({ seen: s.seen + 1, correct: s.correct + (correct ? 1 : 0) }));
+
+        setAllCards(prev => {
+          const updated = updateCard(prev, current.nl, c => {
+            const q = correct ? 4 : 1;
+            const { ef, interval, dueDate } = sm2(c, q);
+            return { ...c, ef, interval, dueDate, lapses: correct ? c.lapses : c.lapses + 1 };
+          });
+          persist(updated);
+          setQueue(q => {
+            const next = q.slice(1);
+            if (!correct) next.splice(Math.min(4, next.length), 0, updated.find(c => c.nl === current.nl));
+            return next;
+          });
+          return updated;
+        });
+        if (correct) setTimeout(handleNextCard, 750);
+      };
+
+      const handleNextCard = () => {
+        setQueue(prev => {
+          advance(prev, cardsRef.current);
+          return prev;
+        });
+      };
+
+      const handleReset = async () => {
+        if (!confirm("Reset ALL progress? Cannot be undone.")) return;
+        try { localStorage.removeItem(STORAGE_KEY); } catch {}
+        const fresh = initCards(null);
+        cardsRef.current = fresh;
+        setAllCards(fresh);
+        launchSession(fresh);
+      };
+
+      if (loading) return (
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui", color: "var(--text-secondary)" }}>
+          Loading your progress...
+        </div>
+      );
+
+      const t          = today();
+      const mastered   = (allCards || []).filter(c => c.phase === "prod" && c.interval >= 21).length;
+      const inProd     = (allCards || []).filter(c => c.phase === "prod" && c.interval < 21).length;
+      const introduced = (allCards || []).filter(c => c.recogStreak > 0 || c.phase === "prod" || c.lapses > 0).length;
+      const dueTomorrow= (allCards || []).filter(c => c.dueDate === addDays(t, 1)).length;
+      const accuracy   = sessionStats.seen > 0 ? Math.round((sessionStats.correct / sessionStats.seen) * 100) : 0;
+      const word       = current ? wordFor(current.nl) : null;
+      const modeColor  = current?.phase === "prod" ? "#f59e0b" : "#6366f1";
+
+      return (
+        <div style={{ minHeight: "100vh", background: "var(--bg-primary)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px", fontFamily: "system-ui, sans-serif" }}>
+
+          {/* Header */}
+          <div style={{ width: "100%", maxWidth: 500, marginBottom: 18 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+              <h1 style={{ margin: 0, fontSize: 19, fontWeight: 700, color: "var(--text-primary)" }}>🇳🇱 Dutch Vocab</h1>
+              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+                {saveIndicator && <span style={{ fontSize: 12, color: "#22c55e", fontWeight: 600 }}>{saveIndicator}</span>}
+                {current && !sessionDone && (
+                  <span style={{ fontSize: 12, background: modeColor, color: "#fff", borderRadius: 20, padding: "2px 10px", fontWeight: 600 }}>
+                    {current.phase === "prod" ? "✍️ Produce" : "👁 Recognise"}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Stats row */}
+            <div style={{ display: "flex", gap: 14, color: "var(--text-secondary)", fontSize: 12, flexWrap: "wrap", marginBottom: 8 }}>
+              <span>📥 {introduced}/{ALL_WORDS.length} introduced</span>
+              <span>✍️ {inProd} learning</span>
+              <span>🏁 {mastered} mastered</span>
+              <span>📋 {queue.length} left today</span>
+              {!sessionDone && <span>✅ {sessionStats.correct}/{sessionStats.seen} ({accuracy}%)</span>}
+            </div>
+
+            {/* Progress bar */}
+            <div style={{ height: 5, background: "var(--bg-secondary)", borderRadius: 3, overflow: "hidden" }}>
+              <div style={{ height: "100%", display: "flex" }}>
+                <div style={{ width: `${(mastered / ALL_WORDS.length) * 100}%`, background: "#22c55e", transition: "width 0.3s" }} />
+                <div style={{ width: `${(inProd / ALL_WORDS.length) * 100}%`, background: "#f59e0b", transition: "width 0.3s" }} />
+              </div>
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 3 }}>
+              🟢 mastered &nbsp;🟡 learning &nbsp;⬜ not yet seen
+            </div>
+          </div>
+
+          {/* Session done */}
+          {sessionDone ? (
+            <div style={{ maxWidth: 500, width: "100%", background: "var(--bg-secondary)", borderRadius: 16, padding: "28px 24px", textAlign: "center" }}>
+              <div style={{ fontSize: 44, marginBottom: 10 }}>
+                {buildSessionQueue(allCards).length === 0 ? "🏆" : "✅"}
+              </div>
+              <h2 style={{ color: "var(--text-primary)", margin: "0 0 6px" }}>
+                {buildSessionQueue(allCards).length === 0 ? "Nothing due right now!" : "Session complete!"}
+              </h2>
+              <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: "0 0 6px" }}>
+                {sessionStats.seen > 0 ? `You reviewed ${sessionStats.seen} cards with ${accuracy}% accuracy.` : ""}
+              </p>
+              <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: "0 0 20px" }}>
+                {dueTomorrow} cards due tomorrow. Come back then to keep your streak going.
+              </p>
+              <button onClick={() => launchSession(cardsRef.current)}
+                style={{ background: "#6366f1", color: "#fff", border: "none", borderRadius: 10, padding: "11px 24px", fontSize: 15, cursor: "pointer", fontWeight: 600, marginRight: 8 }}>
+                Refresh session
+              </button>
+              <button onClick={handleReset}
+                style={{ background: "transparent", color: "var(--text-tertiary)", border: "1px solid var(--border-primary)", borderRadius: 10, padding: "11px 16px", fontSize: 13, cursor: "pointer" }}>
+                Reset
+              </button>
+            </div>
+
+          ) : current && word ? (
+            <div style={{ maxWidth: 500, width: "100%" }}>
+
+              {/* Card */}
+              <div style={{ background: "var(--bg-secondary)", borderRadius: 16, padding: "26px 22px", marginBottom: 14, textAlign: "center", borderTop: `4px solid ${modeColor}`, boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
+                {current.phase === "recog" ? (
+                  <>
+                    <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>What does this mean?</div>
+                    <div style={{ fontSize: 36, fontWeight: 700, color: "var(--text-primary)", letterSpacing: -0.5 }}>{word.nl}</div>
+                    {current.lapses > 0 && <div style={{ fontSize: 11, color: "#ef4444", marginTop: 6 }}>⚠️ Previously difficult</div>}
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Type the Dutch word</div>
+                    <div style={{ fontSize: 30, fontWeight: 700, color: "var(--text-primary)" }}>{word.en}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 6 }}>
+                      {current.interval > 1 ? `Next review in ${current.interval} days if correct` : "First production attempt"}
+                      {current.lapses > 0 ? ` · ${current.lapses} lapse${current.lapses > 1 ? "s" : ""}` : ""}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Recognition options */}
+              {current.phase === "recog" && (
+                <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                  {options.map((opt, i) => {
+                    let bg = "var(--bg-secondary)", border = "2px solid transparent", color = "var(--text-primary)";
+                    if (selected !== null) {
+                      if (opt === word.en)    { bg = "#dcfce7"; border = "2px solid #22c55e"; color = "#166534"; }
+                      else if (opt === selected) { bg = "#fee2e2"; border = "2px solid #ef4444"; color = "#991b1b"; }
+                    }
+                    return (
+                      <button key={i} onClick={() => handleRecog(opt)}
+                        style={{ background: bg, border, borderRadius: 11, padding: "13px 16px", fontSize: 15, color, cursor: selected === null ? "pointer" : "default", textAlign: "left", transition: "all 0.12s", fontWeight: selected !== null && opt === word.en ? 600 : 400 }}>
+                        {String.fromCharCode(65 + i)}. {opt}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Production input */}
+              {current.phase === "prod" && (
+                <div>
+                  <input ref={inputRef} value={typed}
+                    onChange={e => setTyped(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter" && !submitted) handleProd(); }}
+                    disabled={submitted}
+                    placeholder="Type Dutch word, press Enter..."
+                    style={{ width: "100%", padding: "14px 16px", fontSize: 18, borderRadius: 12, border: submitted ? (isCorrect ? "2px solid #22c55e" : "2px solid #ef4444") : "2px solid var(--border-primary)", background: submitted ? (isCorrect ? "#dcfce7" : "#fee2e2") : "var(--bg-secondary)", color: submitted ? (isCorrect ? "#166534" : "#991b1b") : "var(--text-primary)", outline: "none", fontWeight: 600, width: "100%" }}
+                  />
+                  {!submitted && (
+                    <button onClick={handleProd}
+                      style={{ marginTop: 10, width: "100%", background: "#f59e0b", color: "#fff", border: "none", borderRadius: 11, padding: "13px", fontSize: 15, cursor: "pointer", fontWeight: 600 }}>
+                      Check ↵
+                    </button>
+                  )}
+                  {submitted && !isCorrect && (
+                    <div style={{ marginTop: 10, padding: "11px 15px", background: "#fef3c7", borderRadius: 10, fontSize: 14, color: "#92400e" }}>
+                      Answer: <strong>{word.nl}</strong> — coming back shortly
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Feedback + next */}
+              {(selected !== null || submitted) && (
+                <div style={{ marginTop: 14, textAlign: "center" }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, color: isCorrect ? "#16a34a" : "#dc2626" }}>
+                    {isCorrect ? "✓ Correct!" : `✗ ${current.phase === "recog" ? `"${word.en}"` : `"${word.nl}"`}`}
+                    {isCorrect && current.phase === "recog" && (() => {
+                      const updated = cardsRef.current?.find(c => c.nl === current.nl);
+                      if (updated?.phase === "prod") return <span style={{ color: "#6366f1" }}> → now in production mode 🎓</span>;
+                      return <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}> · one more recognition needed</span>;
+                    })()}
+                    {isCorrect && current.phase === "prod" && (() => {
+                      const updated = cardsRef.current?.find(c => c.nl === current.nl);
+                      if (updated) return <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}> · next review in {updated.interval} day{updated.interval !== 1 ? "s" : ""}</span>;
+                    })()}
+                  </div>
+                  {!isCorrect && (
+                    <button onClick={handleNextCard}
+                      style={{ background: "#6366f1", color: "#fff", border: "none", borderRadius: 10, padding: "11px 32px", fontSize: 15, cursor: "pointer", fontWeight: 600 }}>
+                      Next →
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : null}
+
+          <button onClick={handleReset} style={{ marginTop: 24, background: "transparent", color: "var(--text-tertiary)", border: "none", fontSize: 11, cursor: "pointer", textDecoration: "underline" }}>
+            Reset all progress
+          </button>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
