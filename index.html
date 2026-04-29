@@ -258,12 +258,21 @@
           persist(updated);
           setQueue(q => {
             const next = q.slice(1);
-            if (!correct) next.splice(Math.min(4, next.length), 0, updated.find(c => c.nl === current.nl));
+            const card = updated.find(c => c.nl === current.nl);
+            if (!correct) {
+              next.splice(Math.min(4, next.length), 0, card);
+            } else if (card?.phase === "prod") {
+              // Just graduated — add a production attempt later this session
+              next.splice(Math.min(4, next.length), 0, card);
+            }
             return next;
           });
           return updated;
         });
-        if (correct) setTimeout(handleNextCard, 750);
+        if (correct) {
+          const willGraduate = current.recogStreak + 1 >= 2;
+          setTimeout(handleNextCard, willGraduate ? 1400 : 750);
+        }
       };
 
       const handleProd = () => {
