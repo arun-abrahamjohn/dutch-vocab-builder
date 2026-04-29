@@ -102,8 +102,6 @@
 
     // ─── Storage (localStorage) ───────────────────────────────────────────────
     const STORAGE_KEY    = "dutch-sm2-v1";
-    const NEW_PER_SESSION = 15;
-
     async function load() {
       try {
         const r = localStorage.getItem(STORAGE_KEY);
@@ -148,15 +146,14 @@
 
       const reviews  = due.filter(c => !(c.recogStreak === 0 && c.lapses === 0 && c.phase === "recog"));
       const newCards  = due.filter(c =>   c.recogStreak === 0 && c.lapses === 0 && c.phase === "recog");
-      const sessionNew = newCards.slice(0, NEW_PER_SESSION);
 
       // interleave: 2 reviews per 1 new card
       const queue = [];
       let ri = 0, ni = 0;
-      while (ri < reviews.length || ni < sessionNew.length) {
+      while (ri < reviews.length || ni < newCards.length) {
         if (ri < reviews.length) queue.push(reviews[ri++]);
         if (ri < reviews.length) queue.push(reviews[ri++]);
-        if (ni < sessionNew.length) queue.push(sessionNew[ni++]);
+        if (ni < newCards.length) queue.push(newCards[ni++]);
       }
       return queue;
     }
@@ -195,6 +192,16 @@
         setSessionDone(false);
         if (q.length === 0) { setSessionDone(true); return; }
         showCard(q[0], cards);
+      };
+
+      const launchExtraSession = (cards) => {
+        const unseen = cards.filter(c => c.recogStreak === 0 && c.lapses === 0 && c.phase === "recog");
+        if (unseen.length === 0) { alert("No more new cards left!"); return; }
+        const batch = unseen.slice(0, 15);
+        setQueue(batch);
+        setSessionStats({ correct: 0, seen: 0 });
+        setSessionDone(false);
+        showCard(batch[0], cards);
       };
 
       const showCard = (cardData, cards) => {
@@ -371,6 +378,10 @@
               <button onClick={() => launchSession(cardsRef.current)}
                 style={{ background: "#6366f1", color: "#fff", border: "none", borderRadius: 10, padding: "11px 24px", fontSize: 15, cursor: "pointer", fontWeight: 600, marginRight: 8 }}>
                 Refresh session
+              </button>
+              <button onClick={() => launchExtraSession(cardsRef.current)}
+                style={{ background: "#22c55e", color: "#fff", border: "none", borderRadius: 10, padding: "11px 24px", fontSize: 15, cursor: "pointer", fontWeight: 600, marginRight: 8 }}>
+                Study more new cards
               </button>
               <button onClick={handleReset}
                 style={{ background: "transparent", color: "var(--text-tertiary)", border: "1px solid var(--border-primary)", borderRadius: 10, padding: "11px 16px", fontSize: 13, cursor: "pointer" }}>
