@@ -13,9 +13,9 @@
   <style>
     :root {
       --bg:     #0d0e15;
-      --text:   #dde0f0;
-      --text-2: #565a78;
-      --text-3: #2e3044;
+      --text:   #dde0f0;  /* 14.7:1 */
+      --text-2: #7a82a6;  /* 5.1:1  — AA body text  */
+      --text-3: #58607c;  /* 3.1:1  — AA large/decorative only */
       --border: rgba(255,255,255,0.08);
       --violet: #8b7cf8;
       --amber:  #d98d42;
@@ -380,30 +380,35 @@
           <div style={{ width:"100%", maxWidth:456, position:"relative", zIndex:1 }}>
 
             {/* Header */}
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:22 }}>
-              <div>
-                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:9 }}>
-                  <span style={{ fontSize:19 }}>🇳🇱</span>
-                  <span style={{ fontSize:15, fontWeight:600, color:"var(--text)", letterSpacing:"-0.3px" }}>Dutch Vocab</span>
-                  {saveIndicator && <span style={{ fontSize:11, color:"var(--green)", fontWeight:500, opacity:0.75 }}>· saved</span>}
+            <div style={{ marginBottom:20 }}>
+              <div style={{ display:"flex", alignItems:"flex-start", justifyContent:"space-between", marginBottom:6 }}>
+                <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+                  <span style={{ fontSize:22 }}>🇳🇱</span>
+                  <div>
+                    <div style={{ fontSize:22, fontWeight:800, color:"var(--text)", letterSpacing:"-0.8px", lineHeight:1 }}>Woordenschat</div>
+                    <div style={{ fontSize:11, color:"var(--text-2)", marginTop:4, letterSpacing:"0.1px", display:"flex", alignItems:"center", gap:6 }}>
+                      <span>build your dutch</span>
+                      {current && !sessionDone && (
+                        <span style={{ color:modeColor, fontWeight:500 }}>· {current.phase === "prod" ? "produce" : "recognise"}</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
-                <div style={{ fontSize:12, color:"var(--text-2)", display:"flex", flexWrap:"wrap", gap:"0 18px", lineHeight:1.8 }}>
-                  <span>{introduced}<span style={{ color:"var(--text-3)" }}>/{ALL_WORDS.length}</span> introduced</span>
-                  <span>{inProd} learning</span>
-                  <span>{mastered} mastered</span>
-                  {!sessionDone && queue.length > 0 && <span style={{ color:"var(--text)" }}>{queue.length} left</span>}
-                  {!sessionDone && sessionStats.seen > 0 && (
-                    <span style={{ color: accuracy >= 80 ? "var(--green)" : accuracy >= 55 ? "var(--amber)" : "var(--red)" }}>
-                      {accuracy}%
-                    </span>
-                  )}
-                </div>
+                {saveIndicator && <span style={{ fontSize:11, color:"var(--green)", fontWeight:500, opacity:0.7, marginTop:2 }}>saved</span>}
               </div>
-              {current && !sessionDone && (
-                <span style={{ fontSize:10, fontWeight:600, letterSpacing:"1.4px", textTransform:"uppercase", color:modeColor, marginTop:2, opacity:0.85 }}>
-                  {current.phase === "prod" ? "produce" : "recognise"}
-                </span>
-              )}
+              <div style={{ fontSize:12, color:"var(--text-2)", display:"flex", flexWrap:"wrap", gap:"0 20px", marginTop:14, lineHeight:1 }}>
+                <span><strong style={{ color:"var(--text)", fontWeight:600 }}>{introduced}</strong><span style={{ color:"var(--text-3)" }}>/{ALL_WORDS.length}</span></span>
+                <span><strong style={{ color:"var(--text)", fontWeight:600 }}>{inProd}</strong> learning</span>
+                <span><strong style={{ color:"var(--text)", fontWeight:600 }}>{mastered}</strong> mastered</span>
+                {!sessionDone && queue.length > 0 && (
+                  <span><strong style={{ color:"var(--text)", fontWeight:600 }}>{queue.length}</strong> left</span>
+                )}
+                {!sessionDone && sessionStats.seen > 0 && (
+                  <span style={{ color: accuracy >= 80 ? "var(--green)" : accuracy >= 55 ? "var(--amber)" : "var(--red)", fontWeight:600 }}>
+                    {accuracy}%
+                  </span>
+                )}
+              </div>
             </div>
 
             {/* Progress bar */}
@@ -426,7 +431,7 @@
                 <p style={{ color:"var(--text-2)", fontSize:14, margin:"0 0 6px", lineHeight:1.7 }}>
                   {sessionStats.seen > 0 ? `${sessionStats.seen} cards · ${accuracy}% accuracy` : "Nothing due right now."}
                 </p>
-                <p style={{ color:"var(--text-3)", fontSize:13, margin:"0 0 36px" }}>
+                <p style={{ color:"var(--text-2)", fontSize:13, margin:"0 0 36px" }}>
                   {dueTomorrow} due tomorrow
                 </p>
                 <div style={{ display:"flex", flexDirection:"column", gap:9 }}>
@@ -456,13 +461,13 @@
                 }}>
                   {current.phase === "recog" ? (
                     <>
-                      <div style={{ fontSize:10, color:"var(--text-3)", marginBottom:20, textTransform:"uppercase", letterSpacing:"2.5px", fontWeight:600 }}>What does this mean?</div>
+                      <div style={{ fontSize:10, color:"var(--text-2)", marginBottom:20, textTransform:"uppercase", letterSpacing:"2.5px", fontWeight:600 }}>What does this mean?</div>
                       <div style={{ fontSize:58, fontWeight:800, color:"var(--text)", letterSpacing:"-2px", lineHeight:1.05 }}>{word.nl}</div>
                       {current.lapses > 0 && <div style={{ fontSize:11, color:"var(--red)", marginTop:16, fontWeight:500, opacity:0.8 }}>Previously difficult</div>}
                     </>
                   ) : (
                     <>
-                      <div style={{ fontSize:10, color:"var(--text-3)", marginBottom:20, textTransform:"uppercase", letterSpacing:"2.5px", fontWeight:600 }}>Type the Dutch word</div>
+                      <div style={{ fontSize:10, color:"var(--text-2)", marginBottom:20, textTransform:"uppercase", letterSpacing:"2.5px", fontWeight:600 }}>Type the Dutch word</div>
                       <div style={{ fontSize:44, fontWeight:800, color:"var(--text)", letterSpacing:"-0.5px", lineHeight:1.2 }}>{word.en}</div>
                       <div style={{ fontSize:11, color:"var(--text-2)", marginTop:14 }}>
                         {current.interval > 1 ? `Review in ${current.interval} days if correct` : "First production attempt"}
@@ -566,7 +571,7 @@
             ) : null}
 
             {!sessionDone && (
-              <button onClick={handleReset} style={{ display:"block", margin:"40px auto 0", background:"transparent", color:"var(--text-3)", border:"none", fontSize:11, cursor:"pointer", fontFamily:"inherit", opacity:0.6 }}>
+              <button onClick={handleReset} style={{ display:"block", margin:"40px auto 0", background:"transparent", color:"var(--text-2)", border:"none", fontSize:11, cursor:"pointer", fontFamily:"inherit" }}>
                 reset progress
               </button>
             )}
