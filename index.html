@@ -9,25 +9,44 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     :root {
-      --bg-primary: #f8fafc;
-      --bg-secondary: #ffffff;
-      --text-primary: #0f172a;
-      --text-secondary: #475569;
-      --text-tertiary: #94a3b8;
-      --border-primary: #e2e8f0;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg-primary: #0f172a;
-        --bg-secondary: #1e293b;
-        --text-primary: #f1f5f9;
-        --text-secondary: #94a3b8;
-        --text-tertiary: #64748b;
-        --border-primary: #334155;
-      }
+      --bg-primary:   #0b0c15;
+      --bg-secondary: #12141f;
+      --bg-elevated:  #191c2e;
+      --text-primary:   #eef0ff;
+      --text-secondary: #7880a0;
+      --text-tertiary:  #3e4460;
+      --border-primary: rgba(255,255,255,0.07);
     }
     *, *::before, *::after { box-sizing: border-box; }
     body { margin: 0; background: var(--bg-primary); }
+
+    .btn-option {
+      transition: background 0.13s, transform 0.1s;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .btn-option:hover {
+      background: rgba(255,255,255,0.05) !important;
+      transform: translateX(4px);
+    }
+    .btn-option.answered {
+      cursor: default;
+      transform: none !important;
+      pointer-events: none;
+    }
+
+    input.prod-input { font-family: inherit; }
+    input.prod-input:focus {
+      border-color: #6366f1 !important;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+      outline: none;
+    }
+
+    @keyframes cardIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .card-anim { animation: cardIn 0.22s ease; }
   </style>
 </head>
 <body>
@@ -145,7 +164,7 @@
         .sort((a, b) => (a.dueDate < b.dueDate ? -1 : 1));
 
       const reviews  = due.filter(c => !(c.recogStreak === 0 && c.lapses === 0 && c.phase === "recog"));
-      const newCards  = due.filter(c =>   c.recogStreak === 0 && c.lapses === 0 && c.phase === "recog");
+      const newCards  = due.filter(c =>   c.recogStreak === 0 && c.lapses === 0 && c.phase === "recog").slice(0, 15);
 
       // interleave: 2 reviews per 1 new card
       const queue = [];
@@ -332,156 +351,199 @@
       const modeColor  = current?.phase === "prod" ? "#f59e0b" : "#6366f1";
 
       return (
-        <div style={{ minHeight: "100vh", background: "var(--bg-primary)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px", fontFamily: "system-ui, sans-serif" }}>
+        <div style={{ minHeight: "100vh", background: "var(--bg-primary)", display: "flex", flexDirection: "column", alignItems: "center", padding: "32px 20px 48px", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" }}>
 
           {/* Header */}
-          <div style={{ width: "100%", maxWidth: 500, marginBottom: 18 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-              <h1 style={{ margin: 0, fontSize: 19, fontWeight: 700, color: "var(--text-primary)" }}>🇳🇱 Dutch Vocab</h1>
+          <div style={{ width: "100%", maxWidth: 480, marginBottom: 28 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontSize: 24 }}>🇳🇱</span>
+                <span style={{ fontSize: 17, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.3px" }}>Dutch Vocab</span>
+              </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                {saveIndicator && <span style={{ fontSize: 12, color: "#22c55e", fontWeight: 600 }}>{saveIndicator}</span>}
+                {saveIndicator && (
+                  <span style={{ fontSize: 11, color: "#22c55e", fontWeight: 600, background: "rgba(34,197,94,0.12)", padding: "4px 10px", borderRadius: 20 }}>
+                    ✓ Saved
+                  </span>
+                )}
                 {current && !sessionDone && (
-                  <span style={{ fontSize: 12, background: modeColor, color: "#fff", borderRadius: 20, padding: "2px 10px", fontWeight: 600 }}>
-                    {current.phase === "prod" ? "✍️ Produce" : "👁 Recognise"}
+                  <span style={{ fontSize: 11, background: modeColor, color: "#fff", borderRadius: 20, padding: "4px 12px", fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase" }}>
+                    {current.phase === "prod" ? "✍ Produce" : "● Recognise"}
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Stats row */}
-            <div style={{ display: "flex", gap: 14, color: "var(--text-secondary)", fontSize: 12, flexWrap: "wrap", marginBottom: 8 }}>
-              <span>📥 {introduced}/{ALL_WORDS.length} introduced</span>
-              <span>✍️ {inProd} learning</span>
-              <span>🏁 {mastered} mastered</span>
-              <span>📋 {queue.length} left today</span>
-              {!sessionDone && <span>✅ {sessionStats.correct}/{sessionStats.seen} ({accuracy}%)</span>}
+            {/* Stat pills */}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+              {[
+                { value: `${introduced}/${ALL_WORDS.length}`, label: "introduced" },
+                { value: inProd,       label: "learning"   },
+                { value: mastered,     label: "mastered"   },
+                { value: queue.length, label: "left"       },
+                ...(sessionStats.seen > 0 && !sessionDone ? [{ value: `${accuracy}%`, label: "accuracy" }] : []),
+              ].map(({ value, label }) => (
+                <div key={label} style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-primary)", borderRadius: 10, padding: "7px 13px" }}>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>{value}</div>
+                  <div style={{ fontSize: 10, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.6px", marginTop: 3 }}>{label}</div>
+                </div>
+              ))}
             </div>
 
             {/* Progress bar */}
-            <div style={{ height: 5, background: "var(--bg-secondary)", borderRadius: 3, overflow: "hidden" }}>
+            <div style={{ height: 4, background: "var(--bg-elevated)", borderRadius: 4, overflow: "hidden" }}>
               <div style={{ height: "100%", display: "flex" }}>
-                <div style={{ width: `${(mastered / ALL_WORDS.length) * 100}%`, background: "#22c55e", transition: "width 0.3s" }} />
-                <div style={{ width: `${(inProd / ALL_WORDS.length) * 100}%`, background: "#f59e0b", transition: "width 0.3s" }} />
+                <div style={{ width: `${(mastered / ALL_WORDS.length) * 100}%`, background: "linear-gradient(90deg,#16a34a,#22c55e)", transition: "width 0.5s ease" }} />
+                <div style={{ width: `${(inProd   / ALL_WORDS.length) * 100}%`, background: "linear-gradient(90deg,#d97706,#f59e0b)", transition: "width 0.5s ease" }} />
               </div>
             </div>
-            <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 3 }}>
-              🟢 mastered &nbsp;🟡 learning &nbsp;⬜ not yet seen
+            <div style={{ display: "flex", gap: 16, marginTop: 7 }}>
+              <span style={{ fontSize: 10, color: "#22c55e", letterSpacing: "0.3px" }}>● mastered</span>
+              <span style={{ fontSize: 10, color: "#f59e0b", letterSpacing: "0.3px" }}>● learning</span>
+              <span style={{ fontSize: 10, color: "var(--text-tertiary)", letterSpacing: "0.3px" }}>● unseen</span>
             </div>
           </div>
 
           {/* Session done */}
           {sessionDone ? (
-            <div style={{ maxWidth: 500, width: "100%", background: "var(--bg-secondary)", borderRadius: 16, padding: "28px 24px", textAlign: "center" }}>
-              <div style={{ fontSize: 44, marginBottom: 10 }}>
+            <div className="card-anim" style={{ maxWidth: 480, width: "100%", background: "var(--bg-secondary)", border: "1px solid var(--border-primary)", borderRadius: 22, padding: "44px 32px", textAlign: "center" }}>
+              <div style={{ fontSize: 54, marginBottom: 18 }}>
                 {buildSessionQueue(allCards).length === 0 ? "🏆" : "✅"}
               </div>
-              <h2 style={{ color: "var(--text-primary)", margin: "0 0 6px" }}>
-                {buildSessionQueue(allCards).length === 0 ? "Nothing due right now!" : "Session complete!"}
+              <h2 style={{ color: "var(--text-primary)", margin: "0 0 10px", fontSize: 24, fontWeight: 800, letterSpacing: "-0.5px" }}>
+                {buildSessionQueue(allCards).length === 0 ? "All caught up!" : "Session complete!"}
               </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: "0 0 6px" }}>
-                {sessionStats.seen > 0 ? `You reviewed ${sessionStats.seen} cards with ${accuracy}% accuracy.` : ""}
+              <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: "0 0 4px", lineHeight: 1.6 }}>
+                {sessionStats.seen > 0 ? `${sessionStats.seen} cards reviewed · ${accuracy}% accuracy` : "Nothing was due."}
               </p>
-              <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: "0 0 20px" }}>
-                {dueTomorrow} cards due tomorrow. Come back then to keep your streak going.
+              <p style={{ color: "var(--text-tertiary)", fontSize: 13, margin: "0 0 32px", lineHeight: 1.6 }}>
+                {dueTomorrow} cards due tomorrow.
               </p>
-              <button onClick={() => launchSession(cardsRef.current)}
-                style={{ background: "#6366f1", color: "#fff", border: "none", borderRadius: 10, padding: "11px 24px", fontSize: 15, cursor: "pointer", fontWeight: 600, marginRight: 8 }}>
-                Refresh session
-              </button>
-              <button onClick={() => launchExtraSession(cardsRef.current)}
-                style={{ background: "#22c55e", color: "#fff", border: "none", borderRadius: 10, padding: "11px 24px", fontSize: 15, cursor: "pointer", fontWeight: 600, marginRight: 8 }}>
-                Study more new cards
-              </button>
-              <button onClick={handleReset}
-                style={{ background: "transparent", color: "var(--text-tertiary)", border: "1px solid var(--border-primary)", borderRadius: 10, padding: "11px 16px", fontSize: 13, cursor: "pointer" }}>
-                Reset
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <button onClick={() => launchSession(cardsRef.current)}
+                  style={{ width: "100%", background: "#6366f1", color: "#fff", border: "none", borderRadius: 13, padding: "14px", fontSize: 15, cursor: "pointer", fontWeight: 700, letterSpacing: "-0.2px" }}>
+                  Check for new cards
+                </button>
+                <button onClick={() => launchExtraSession(cardsRef.current)}
+                  style={{ width: "100%", background: "var(--bg-elevated)", color: "var(--text-primary)", border: "1px solid var(--border-primary)", borderRadius: 13, padding: "14px", fontSize: 15, cursor: "pointer", fontWeight: 600 }}>
+                  Study more new cards →
+                </button>
+                <button onClick={handleReset}
+                  style={{ background: "transparent", color: "var(--text-tertiary)", border: "none", fontSize: 12, cursor: "pointer", padding: "6px", marginTop: 4, textDecoration: "underline", opacity: 0.7 }}>
+                  Reset all progress
+                </button>
+              </div>
             </div>
 
           ) : current && word ? (
-            <div style={{ maxWidth: 500, width: "100%" }}>
+            <div className="card-anim" style={{ maxWidth: 480, width: "100%" }}>
 
-              {/* Card */}
-              <div style={{ background: "var(--bg-secondary)", borderRadius: 16, padding: "26px 22px", marginBottom: 14, textAlign: "center", borderTop: `4px solid ${modeColor}`, boxShadow: "0 2px 10px rgba(0,0,0,0.07)" }}>
+              {/* Word card */}
+              <div style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-primary)", borderRadius: 22, padding: "36px 28px", marginBottom: 12, textAlign: "center", borderTop: `3px solid ${modeColor}`, boxShadow: "0 12px 40px rgba(0,0,0,0.4)" }}>
                 {current.phase === "recog" ? (
                   <>
-                    <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>What does this mean?</div>
-                    <div style={{ fontSize: 36, fontWeight: 700, color: "var(--text-primary)", letterSpacing: -0.5 }}>{word.nl}</div>
-                    {current.lapses > 0 && <div style={{ fontSize: 11, color: "#ef4444", marginTop: 6 }}>⚠️ Previously difficult</div>}
+                    <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 16, textTransform: "uppercase", letterSpacing: "2px", fontWeight: 700 }}>What does this mean?</div>
+                    <div style={{ fontSize: 54, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-1.5px", lineHeight: 1.1 }}>{word.nl}</div>
+                    {current.lapses > 0 && <div style={{ fontSize: 11, color: "#ef4444", marginTop: 14, fontWeight: 600, letterSpacing: "0.3px" }}>⚠ Previously difficult</div>}
                   </>
                 ) : (
                   <>
-                    <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>Type the Dutch word</div>
-                    <div style={{ fontSize: 30, fontWeight: 700, color: "var(--text-primary)" }}>{word.en}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 6 }}>
+                    <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 16, textTransform: "uppercase", letterSpacing: "2px", fontWeight: 700 }}>Type the Dutch word</div>
+                    <div style={{ fontSize: 40, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.5px", lineHeight: 1.2 }}>{word.en}</div>
+                    <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 14, letterSpacing: "0.2px" }}>
                       {current.interval > 1 ? `Next review in ${current.interval} days if correct` : "First production attempt"}
-                      {current.lapses > 0 ? ` · ${current.lapses} lapse${current.lapses > 1 ? "s" : ""}` : ""}
+                      {current.lapses > 0 ? ` · ${current.lapses} lapse${current.lapses !== 1 ? "s" : ""}` : ""}
                     </div>
                   </>
                 )}
               </div>
 
-              {/* Recognition options */}
+              {/* MCQ options */}
               {current.phase === "recog" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 9 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                   {options.map((opt, i) => {
-                    let bg = "var(--bg-secondary)", border = "2px solid transparent", color = "var(--text-primary)";
-                    if (selected !== null) {
-                      if (opt === word.en)    { bg = "#dcfce7"; border = "2px solid #22c55e"; color = "#166534"; }
-                      else if (opt === selected) { bg = "#fee2e2"; border = "2px solid #ef4444"; color = "#991b1b"; }
-                    }
+                    const isAnswer = selected !== null && opt === word.en;
+                    const isWrong  = selected !== null && opt === selected && opt !== word.en;
                     return (
                       <button key={i} onClick={() => handleRecog(opt)}
-                        style={{ background: bg, border, borderRadius: 11, padding: "13px 16px", fontSize: 15, color, cursor: selected === null ? "pointer" : "default", textAlign: "left", transition: "all 0.12s", fontWeight: selected !== null && opt === word.en ? 600 : 400 }}>
-                        {String.fromCharCode(65 + i)}. {opt}
+                        className={`btn-option${selected !== null ? " answered" : ""}`}
+                        style={{
+                          background: isAnswer ? "rgba(34,197,94,0.13)" : isWrong ? "rgba(239,68,68,0.11)" : "var(--bg-elevated)",
+                          border:     "1px solid " + (isAnswer ? "rgba(34,197,94,0.45)" : isWrong ? "rgba(239,68,68,0.45)" : "var(--border-primary)"),
+                          borderLeft: "3px solid " + (isAnswer ? "#22c55e" : isWrong ? "#ef4444" : "transparent"),
+                          borderRadius: 14, padding: "14px 16px",
+                          display: "flex", alignItems: "center", gap: 14,
+                          width: "100%", textAlign: "left",
+                        }}>
+                        <span style={{
+                          width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          background: isAnswer ? "#22c55e" : isWrong ? "#ef4444" : "var(--bg-primary)",
+                          color: isAnswer || isWrong ? "#fff" : "var(--text-tertiary)",
+                          fontSize: 12, fontWeight: 700,
+                        }}>
+                          {String.fromCharCode(65 + i)}
+                        </span>
+                        <span style={{ fontSize: 15, color: isAnswer ? "#4ade80" : isWrong ? "#f87171" : "var(--text-primary)", fontWeight: isAnswer ? 600 : 400 }}>
+                          {opt}
+                        </span>
                       </button>
                     );
                   })}
                 </div>
               )}
 
-              {/* Production input */}
+              {/* Production */}
               {current.phase === "prod" && (
                 <div>
                   <input ref={inputRef} value={typed}
                     onChange={e => setTyped(e.target.value)}
                     onKeyDown={e => { if (e.key === "Enter" && !submitted) handleProd(); }}
                     disabled={submitted}
-                    placeholder="Type Dutch word, press Enter..."
-                    style={{ width: "100%", padding: "14px 16px", fontSize: 18, borderRadius: 12, border: submitted ? (isCorrect ? "2px solid #22c55e" : "2px solid #ef4444") : "2px solid var(--border-primary)", background: submitted ? (isCorrect ? "#dcfce7" : "#fee2e2") : "var(--bg-secondary)", color: submitted ? (isCorrect ? "#166534" : "#991b1b") : "var(--text-primary)", outline: "none", fontWeight: 600, width: "100%" }}
+                    className="prod-input"
+                    placeholder="Type Dutch word…"
+                    style={{
+                      width: "100%", padding: "16px 18px", fontSize: 20,
+                      borderRadius: 14,
+                      border: "2px solid " + (submitted ? (isCorrect ? "#22c55e" : "#ef4444") : "var(--border-primary)"),
+                      background: submitted ? (isCorrect ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.10)") : "var(--bg-elevated)",
+                      color: submitted ? (isCorrect ? "#4ade80" : "#f87171") : "var(--text-primary)",
+                      fontWeight: 700, outline: "none", letterSpacing: "-0.3px",
+                      transition: "border-color 0.15s, background 0.15s",
+                    }}
                   />
                   {!submitted && (
                     <button onClick={handleProd}
-                      style={{ marginTop: 10, width: "100%", background: "#f59e0b", color: "#fff", border: "none", borderRadius: 11, padding: "13px", fontSize: 15, cursor: "pointer", fontWeight: 600 }}>
+                      style={{ marginTop: 10, width: "100%", background: "#f59e0b", color: "#fff", border: "none", borderRadius: 13, padding: "14px", fontSize: 15, cursor: "pointer", fontWeight: 700, letterSpacing: "-0.2px" }}>
                       Check ↵
                     </button>
                   )}
                   {submitted && !isCorrect && (
-                    <div style={{ marginTop: 10, padding: "11px 15px", background: "#fef3c7", borderRadius: 10, fontSize: 14, color: "#92400e" }}>
-                      Answer: <strong>{word.nl}</strong> — coming back shortly
+                    <div style={{ marginTop: 10, padding: "13px 16px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 12, fontSize: 14, color: "#fbbf24" }}>
+                      Correct answer: <strong>{word.nl}</strong>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Feedback + next */}
+              {/* Feedback */}
               {(selected !== null || submitted) && (
-                <div style={{ marginTop: 14, textAlign: "center" }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 12, color: isCorrect ? "#16a34a" : "#dc2626" }}>
-                    {isCorrect ? "✓ Correct!" : `✗ ${current.phase === "recog" ? `"${word.en}"` : `"${word.nl}"`}`}
+                <div style={{ marginTop: 16, textAlign: "center" }}>
+                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: isCorrect ? 0 : 14, color: isCorrect ? "#22c55e" : "#ef4444", letterSpacing: "0.2px" }}>
+                    {isCorrect ? "✓ Correct" : `✗ ${current.phase === "recog" ? `"${word.en}"` : `"${word.nl}"`}`}
                     {isCorrect && current.phase === "recog" && (() => {
                       const updated = cardsRef.current?.find(c => c.nl === current.nl);
-                      if (updated?.phase === "prod") return <span style={{ color: "#6366f1" }}> → now in production mode 🎓</span>;
-                      return <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}> · one more recognition needed</span>;
+                      if (updated?.phase === "prod") return <span style={{ color: "#818cf8", fontWeight: 500 }}> · promoted to production 🎓</span>;
+                      return <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}> · one more recognition to go</span>;
                     })()}
                     {isCorrect && current.phase === "prod" && (() => {
                       const updated = cardsRef.current?.find(c => c.nl === current.nl);
-                      if (updated) return <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}> · next review in {updated.interval} day{updated.interval !== 1 ? "s" : ""}</span>;
+                      if (updated) return <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}> · back in {updated.interval} day{updated.interval !== 1 ? "s" : ""}</span>;
                     })()}
                   </div>
                   {!isCorrect && (
                     <button onClick={handleNextCard}
-                      style={{ background: "#6366f1", color: "#fff", border: "none", borderRadius: 10, padding: "11px 32px", fontSize: 15, cursor: "pointer", fontWeight: 600 }}>
+                      style={{ background: "#6366f1", color: "#fff", border: "none", borderRadius: 12, padding: "12px 36px", fontSize: 15, cursor: "pointer", fontWeight: 700 }}>
                       Next →
                     </button>
                   )}
@@ -490,9 +552,11 @@
             </div>
           ) : null}
 
-          <button onClick={handleReset} style={{ marginTop: 24, background: "transparent", color: "var(--text-tertiary)", border: "none", fontSize: 11, cursor: "pointer", textDecoration: "underline" }}>
-            Reset all progress
-          </button>
+          {!sessionDone && (
+            <button onClick={handleReset} style={{ marginTop: 36, background: "transparent", color: "var(--text-tertiary)", border: "none", fontSize: 11, cursor: "pointer", textDecoration: "underline", opacity: 0.5 }}>
+              Reset all progress
+            </button>
+          )}
         </div>
       );
     }
