@@ -3,50 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🇳🇱 Dutch Vocab Builder</title>
+  <title>🇳🇱 Dutch Vocab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     :root {
-      --bg-primary:   #0b0c15;
-      --bg-secondary: #12141f;
-      --bg-elevated:  #191c2e;
-      --text-primary:   #eef0ff;
-      --text-secondary: #7880a0;
-      --text-tertiary:  #3e4460;
-      --border-primary: rgba(255,255,255,0.07);
+      --bg:     #0d0e15;
+      --text:   #dde0f0;
+      --text-2: #565a78;
+      --text-3: #2e3044;
+      --border: rgba(255,255,255,0.08);
+      --violet: #8b7cf8;
+      --amber:  #d98d42;
+      --green:  #42c78a;
+      --red:    #d96262;
     }
+
     *, *::before, *::after { box-sizing: border-box; }
-    body { margin: 0; background: var(--bg-primary); }
+    body { margin: 0; background: var(--bg); font-family: 'Inter', system-ui, sans-serif; }
 
-    .btn-option {
-      transition: background 0.13s, transform 0.1s;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .btn-option:hover {
-      background: rgba(255,255,255,0.05) !important;
-      transform: translateX(4px);
-    }
-    .btn-option.answered {
-      cursor: default;
-      transform: none !important;
-      pointer-events: none;
+    /* Ambient orbs */
+    .orb { position: fixed; border-radius: 50%; filter: blur(90px); pointer-events: none; z-index: 0; }
+    .orb-v { width: 680px; height: 680px; top: -240px; right: -180px;
+              background: radial-gradient(circle, rgba(139,124,248,0.13) 0%, transparent 70%); }
+    .orb-a { width: 560px; height: 560px; bottom: -180px; left: -120px;
+              background: radial-gradient(circle, rgba(217,141,66,0.09) 0%, transparent 70%); }
+
+    /* Glass surface */
+    .glass {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255,255,255,0.09);
     }
 
-    input.prod-input { font-family: inherit; }
-    input.prod-input:focus {
-      border-color: #6366f1 !important;
-      box-shadow: 0 0 0 3px rgba(99,102,241,0.2);
+    /* Option buttons */
+    .opt { transition: background 0.14s, transform 0.1s; cursor: pointer; font-family: inherit; text-align: left; }
+    .opt:hover { background: rgba(255,255,255,0.07) !important; transform: translateX(3px); }
+    .opt.done  { pointer-events: none; }
+    .opt.done:hover { background: revert !important; transform: none !important; }
+
+    /* Input */
+    input.dutch { font-family: inherit; }
+    input.dutch:focus {
+      border-color: var(--violet) !important;
+      box-shadow: 0 0 0 3px rgba(139,124,248,0.16);
       outline: none;
     }
 
-    @keyframes cardIn {
-      from { opacity: 0; transform: translateY(12px); }
+    /* Entrance animation */
+    @keyframes up {
+      from { opacity: 0; transform: translateY(16px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-    .card-anim { animation: cardIn 0.22s ease; }
+    .in { animation: up 0.26s cubic-bezier(0.22, 1, 0.36, 1); }
   </style>
 </head>
 <body>
@@ -342,8 +356,8 @@
       };
 
       if (loading) return (
-        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "system-ui", color: "var(--text-secondary)" }}>
-          Loading your progress...
+        <div style={{ minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:"var(--text-2)", fontSize:14 }}>
+          Loading…
         </div>
       );
 
@@ -354,215 +368,209 @@
       const dueTomorrow= (allCards || []).filter(c => c.dueDate === addDays(t, 1)).length;
       const accuracy   = sessionStats.seen > 0 ? Math.round((sessionStats.correct / sessionStats.seen) * 100) : 0;
       const word       = current ? wordFor(current.nl) : null;
-      const modeColor  = current?.phase === "prod" ? "#f59e0b" : "#6366f1";
+      const modeColor  = current?.phase === "prod" ? "var(--amber)" : "var(--violet)";
 
       return (
-        <div style={{ minHeight: "100vh", background: "var(--bg-primary)", display: "flex", flexDirection: "column", alignItems: "center", padding: "32px 20px 48px", fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif" }}>
+        <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", padding:"40px 20px 64px", position:"relative" }}>
 
-          {/* Header */}
-          <div style={{ width: "100%", maxWidth: 480, marginBottom: 28 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontSize: 24 }}>🇳🇱</span>
-                <span style={{ fontSize: 17, fontWeight: 700, color: "var(--text-primary)", letterSpacing: "-0.3px" }}>Dutch Vocab</span>
-              </div>
-              <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                {saveIndicator && (
-                  <span style={{ fontSize: 11, color: "#22c55e", fontWeight: 600, background: "rgba(34,197,94,0.12)", padding: "4px 10px", borderRadius: 20 }}>
-                    ✓ Saved
-                  </span>
-                )}
-                {current && !sessionDone && (
-                  <span style={{ fontSize: 11, background: modeColor, color: "#fff", borderRadius: 20, padding: "4px 12px", fontWeight: 700, letterSpacing: "0.8px", textTransform: "uppercase" }}>
-                    {current.phase === "prod" ? "✍ Produce" : "● Recognise"}
-                  </span>
-                )}
-              </div>
-            </div>
+          {/* Ambient depth */}
+          <div className="orb orb-v" />
+          <div className="orb orb-a" />
 
-            {/* Stat pills */}
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-              {[
-                { value: `${introduced}/${ALL_WORDS.length}`, label: "introduced" },
-                { value: inProd,       label: "learning"   },
-                { value: mastered,     label: "mastered"   },
-                { value: queue.length, label: "left"       },
-                ...(sessionStats.seen > 0 && !sessionDone ? [{ value: `${accuracy}%`, label: "accuracy" }] : []),
-              ].map(({ value, label }) => (
-                <div key={label} style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-primary)", borderRadius: 10, padding: "7px 13px" }}>
-                  <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", lineHeight: 1 }}>{value}</div>
-                  <div style={{ fontSize: 10, color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.6px", marginTop: 3 }}>{label}</div>
+          <div style={{ width:"100%", maxWidth:456, position:"relative", zIndex:1 }}>
+
+            {/* Header */}
+            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:22 }}>
+              <div>
+                <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:9 }}>
+                  <span style={{ fontSize:19 }}>🇳🇱</span>
+                  <span style={{ fontSize:15, fontWeight:600, color:"var(--text)", letterSpacing:"-0.3px" }}>Dutch Vocab</span>
+                  {saveIndicator && <span style={{ fontSize:11, color:"var(--green)", fontWeight:500, opacity:0.75 }}>· saved</span>}
                 </div>
-              ))}
+                <div style={{ fontSize:12, color:"var(--text-2)", display:"flex", flexWrap:"wrap", gap:"0 18px", lineHeight:1.8 }}>
+                  <span>{introduced}<span style={{ color:"var(--text-3)" }}>/{ALL_WORDS.length}</span> introduced</span>
+                  <span>{inProd} learning</span>
+                  <span>{mastered} mastered</span>
+                  {!sessionDone && queue.length > 0 && <span style={{ color:"var(--text)" }}>{queue.length} left</span>}
+                  {!sessionDone && sessionStats.seen > 0 && (
+                    <span style={{ color: accuracy >= 80 ? "var(--green)" : accuracy >= 55 ? "var(--amber)" : "var(--red)" }}>
+                      {accuracy}%
+                    </span>
+                  )}
+                </div>
+              </div>
+              {current && !sessionDone && (
+                <span style={{ fontSize:10, fontWeight:600, letterSpacing:"1.4px", textTransform:"uppercase", color:modeColor, marginTop:2, opacity:0.85 }}>
+                  {current.phase === "prod" ? "produce" : "recognise"}
+                </span>
+              )}
             </div>
 
             {/* Progress bar */}
-            <div style={{ height: 4, background: "var(--bg-elevated)", borderRadius: 4, overflow: "hidden" }}>
-              <div style={{ height: "100%", display: "flex" }}>
-                <div style={{ width: `${(mastered / ALL_WORDS.length) * 100}%`, background: "linear-gradient(90deg,#16a34a,#22c55e)", transition: "width 0.5s ease" }} />
-                <div style={{ width: `${(inProd   / ALL_WORDS.length) * 100}%`, background: "linear-gradient(90deg,#d97706,#f59e0b)", transition: "width 0.5s ease" }} />
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 16, marginTop: 7 }}>
-              <span style={{ fontSize: 10, color: "#22c55e", letterSpacing: "0.3px" }}>● mastered</span>
-              <span style={{ fontSize: 10, color: "#f59e0b", letterSpacing: "0.3px" }}>● learning</span>
-              <span style={{ fontSize: 10, color: "var(--text-tertiary)", letterSpacing: "0.3px" }}>● unseen</span>
-            </div>
-          </div>
-
-          {/* Session done */}
-          {sessionDone ? (
-            <div className="card-anim" style={{ maxWidth: 480, width: "100%", background: "var(--bg-secondary)", border: "1px solid var(--border-primary)", borderRadius: 22, padding: "44px 32px", textAlign: "center" }}>
-              <div style={{ fontSize: 54, marginBottom: 18 }}>
-                {buildSessionQueue(allCards).length === 0 ? "🏆" : "✅"}
-              </div>
-              <h2 style={{ color: "var(--text-primary)", margin: "0 0 10px", fontSize: 24, fontWeight: 800, letterSpacing: "-0.5px" }}>
-                {buildSessionQueue(allCards).length === 0 ? "All caught up!" : "Session complete!"}
-              </h2>
-              <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: "0 0 4px", lineHeight: 1.6 }}>
-                {sessionStats.seen > 0 ? `${sessionStats.seen} cards reviewed · ${accuracy}% accuracy` : "Nothing was due."}
-              </p>
-              <p style={{ color: "var(--text-tertiary)", fontSize: 13, margin: "0 0 32px", lineHeight: 1.6 }}>
-                {dueTomorrow} cards due tomorrow.
-              </p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <button onClick={() => launchSession(cardsRef.current)}
-                  style={{ width: "100%", background: "#6366f1", color: "#fff", border: "none", borderRadius: 13, padding: "14px", fontSize: 15, cursor: "pointer", fontWeight: 700, letterSpacing: "-0.2px" }}>
-                  Check for new cards
-                </button>
-                <button onClick={() => launchExtraSession(cardsRef.current)}
-                  style={{ width: "100%", background: "var(--bg-elevated)", color: "var(--text-primary)", border: "1px solid var(--border-primary)", borderRadius: 13, padding: "14px", fontSize: 15, cursor: "pointer", fontWeight: 600 }}>
-                  Study more new cards →
-                </button>
-                <button onClick={handleReset}
-                  style={{ background: "transparent", color: "var(--text-tertiary)", border: "none", fontSize: 12, cursor: "pointer", padding: "6px", marginTop: 4, textDecoration: "underline", opacity: 0.7 }}>
-                  Reset all progress
-                </button>
+            <div style={{ height:2, background:"rgba(255,255,255,0.05)", borderRadius:2, marginBottom:30, overflow:"hidden" }}>
+              <div style={{ height:"100%", display:"flex" }}>
+                <div style={{ width:`${(mastered/ALL_WORDS.length)*100}%`, background:"var(--green)", opacity:0.7, transition:"width 0.6s ease" }} />
+                <div style={{ width:`${(inProd/ALL_WORDS.length)*100}%`, background:"var(--amber)", opacity:0.6, transition:"width 0.6s ease" }} />
               </div>
             </div>
 
-          ) : current && word ? (
-            <div className="card-anim" style={{ maxWidth: 480, width: "100%" }}>
+            {/* Session done */}
+            {sessionDone ? (
+              <div className="glass in" style={{ borderRadius:24, padding:"52px 36px", textAlign:"center" }}>
+                <div style={{ fontSize:44, marginBottom:22, filter:"saturate(0.8)" }}>
+                  {buildSessionQueue(allCards).length === 0 ? "🏆" : "✅"}
+                </div>
+                <h2 style={{ color:"var(--text)", margin:"0 0 10px", fontSize:22, fontWeight:700, letterSpacing:"-0.5px" }}>
+                  {buildSessionQueue(allCards).length === 0 ? "All caught up" : "Session done"}
+                </h2>
+                <p style={{ color:"var(--text-2)", fontSize:14, margin:"0 0 6px", lineHeight:1.7 }}>
+                  {sessionStats.seen > 0 ? `${sessionStats.seen} cards · ${accuracy}% accuracy` : "Nothing due right now."}
+                </p>
+                <p style={{ color:"var(--text-3)", fontSize:13, margin:"0 0 36px" }}>
+                  {dueTomorrow} due tomorrow
+                </p>
+                <div style={{ display:"flex", flexDirection:"column", gap:9 }}>
+                  <button onClick={() => launchSession(cardsRef.current)}
+                    style={{ width:"100%", background:"var(--violet)", color:"#fff", border:"none", borderRadius:14, padding:"14px", fontSize:15, cursor:"pointer", fontWeight:600, fontFamily:"inherit", letterSpacing:"-0.2px" }}>
+                    Check for due cards
+                  </button>
+                  <button onClick={() => launchExtraSession(cardsRef.current)}
+                    style={{ width:"100%", background:"rgba(255,255,255,0.05)", color:"var(--text)", border:"1px solid var(--border)", borderRadius:14, padding:"14px", fontSize:15, cursor:"pointer", fontWeight:500, fontFamily:"inherit" }}>
+                    Study more new cards →
+                  </button>
+                  <button onClick={handleReset}
+                    style={{ background:"transparent", color:"var(--text-3)", border:"none", fontSize:12, cursor:"pointer", marginTop:8, fontFamily:"inherit" }}>
+                    Reset progress
+                  </button>
+                </div>
+              </div>
 
-              {/* Word card */}
-              <div style={{ background: "var(--bg-secondary)", border: "1px solid var(--border-primary)", borderRadius: 22, padding: "36px 28px", marginBottom: 12, textAlign: "center", borderTop: `3px solid ${modeColor}`, boxShadow: "0 12px 40px rgba(0,0,0,0.4)" }}>
-                {current.phase === "recog" ? (
-                  <>
-                    <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 16, textTransform: "uppercase", letterSpacing: "2px", fontWeight: 700 }}>What does this mean?</div>
-                    <div style={{ fontSize: 54, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-1.5px", lineHeight: 1.1 }}>{word.nl}</div>
-                    {current.lapses > 0 && <div style={{ fontSize: 11, color: "#ef4444", marginTop: 14, fontWeight: 600, letterSpacing: "0.3px" }}>⚠ Previously difficult</div>}
-                  </>
-                ) : (
-                  <>
-                    <div style={{ fontSize: 10, color: "var(--text-tertiary)", marginBottom: 16, textTransform: "uppercase", letterSpacing: "2px", fontWeight: 700 }}>Type the Dutch word</div>
-                    <div style={{ fontSize: 40, fontWeight: 800, color: "var(--text-primary)", letterSpacing: "-0.5px", lineHeight: 1.2 }}>{word.en}</div>
-                    <div style={{ fontSize: 11, color: "var(--text-tertiary)", marginTop: 14, letterSpacing: "0.2px" }}>
-                      {current.interval > 1 ? `Next review in ${current.interval} days if correct` : "First production attempt"}
-                      {current.lapses > 0 ? ` · ${current.lapses} lapse${current.lapses !== 1 ? "s" : ""}` : ""}
-                    </div>
-                  </>
+            ) : current && word ? (
+              <div className="in">
+
+                {/* Word card */}
+                <div className="glass" style={{
+                  borderRadius:22, padding:"42px 28px 38px", marginBottom:10, textAlign:"center",
+                  borderTop: `1px solid ${current.phase === "prod" ? "rgba(217,141,66,0.45)" : "rgba(139,124,248,0.45)"}`,
+                  boxShadow: "0 24px 64px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06)",
+                }}>
+                  {current.phase === "recog" ? (
+                    <>
+                      <div style={{ fontSize:10, color:"var(--text-3)", marginBottom:20, textTransform:"uppercase", letterSpacing:"2.5px", fontWeight:600 }}>What does this mean?</div>
+                      <div style={{ fontSize:58, fontWeight:800, color:"var(--text)", letterSpacing:"-2px", lineHeight:1.05 }}>{word.nl}</div>
+                      {current.lapses > 0 && <div style={{ fontSize:11, color:"var(--red)", marginTop:16, fontWeight:500, opacity:0.8 }}>Previously difficult</div>}
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize:10, color:"var(--text-3)", marginBottom:20, textTransform:"uppercase", letterSpacing:"2.5px", fontWeight:600 }}>Type the Dutch word</div>
+                      <div style={{ fontSize:44, fontWeight:800, color:"var(--text)", letterSpacing:"-0.5px", lineHeight:1.2 }}>{word.en}</div>
+                      <div style={{ fontSize:11, color:"var(--text-2)", marginTop:14 }}>
+                        {current.interval > 1 ? `Review in ${current.interval} days if correct` : "First production attempt"}
+                        {current.lapses > 0 ? ` · ${current.lapses} lapse${current.lapses !== 1 ? "s" : ""}` : ""}
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* MCQ options */}
+                {current.phase === "recog" && (
+                  <div style={{ display:"flex", flexDirection:"column", gap:7 }}>
+                    {options.map((opt, i) => {
+                      const isAns   = selected !== null && opt === word.en;
+                      const isWrong = selected !== null && opt === selected && !isAns;
+                      return (
+                        <button key={i} onClick={() => handleRecog(opt)}
+                          className={`opt${selected !== null ? " done" : ""}`}
+                          style={{
+                            background: isAns ? "rgba(66,199,138,0.11)" : isWrong ? "rgba(217,98,98,0.10)" : "rgba(255,255,255,0.04)",
+                            border: "1px solid " + (isAns ? "rgba(66,199,138,0.32)" : isWrong ? "rgba(217,98,98,0.32)" : "rgba(255,255,255,0.07)"),
+                            borderRadius:14, padding:"13px 16px",
+                            display:"flex", alignItems:"center", gap:13, width:"100%",
+                          }}>
+                          <span style={{
+                            width:26, height:26, borderRadius:"50%", flexShrink:0,
+                            display:"flex", alignItems:"center", justifyContent:"center",
+                            background: isAns ? "rgba(66,199,138,0.18)" : isWrong ? "rgba(217,98,98,0.18)" : "rgba(255,255,255,0.05)",
+                            color: isAns ? "var(--green)" : isWrong ? "var(--red)" : "var(--text-2)",
+                            fontSize:11, fontWeight:700, fontFamily:"inherit",
+                          }}>
+                            {String.fromCharCode(65 + i)}
+                          </span>
+                          <span style={{ fontSize:15, color: isAns ? "var(--green)" : isWrong ? "var(--red)" : "var(--text)", fontWeight: isAns ? 500 : 400 }}>
+                            {opt}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Production */}
+                {current.phase === "prod" && (
+                  <div>
+                    <input ref={inputRef} value={typed}
+                      onChange={e => setTyped(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter" && !submitted) handleProd(); }}
+                      disabled={submitted}
+                      className="dutch"
+                      placeholder="Type Dutch word…"
+                      style={{
+                        width:"100%", padding:"16px 18px", fontSize:20,
+                        borderRadius:14,
+                        border: "1px solid " + (submitted ? (isCorrect ? "rgba(66,199,138,0.5)" : "rgba(217,98,98,0.5)") : "rgba(255,255,255,0.1)"),
+                        background: submitted ? (isCorrect ? "rgba(66,199,138,0.08)" : "rgba(217,98,98,0.08)") : "rgba(255,255,255,0.05)",
+                        color: submitted ? (isCorrect ? "var(--green)" : "var(--red)") : "var(--text)",
+                        fontWeight:600, outline:"none", letterSpacing:"-0.3px",
+                        transition:"border-color 0.15s, background 0.2s",
+                        fontFamily:"inherit",
+                      }}
+                    />
+                    {!submitted && (
+                      <button onClick={handleProd}
+                        style={{ marginTop:8, width:"100%", background:"var(--amber)", color:"#fff", border:"none", borderRadius:14, padding:"14px", fontSize:15, cursor:"pointer", fontWeight:600, fontFamily:"inherit" }}>
+                        Check ↵
+                      </button>
+                    )}
+                    {submitted && !isCorrect && (
+                      <div style={{ marginTop:8, padding:"12px 16px", background:"rgba(217,141,66,0.08)", border:"1px solid rgba(217,141,66,0.2)", borderRadius:12, fontSize:14, color:"var(--amber)", fontWeight:500 }}>
+                        {word.nl}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Feedback */}
+                {(selected !== null || submitted) && (
+                  <div style={{ marginTop:18, textAlign:"center" }}>
+                    <p style={{ fontSize:13, fontWeight:500, margin: isCorrect ? 0 : "0 0 14px", color: isCorrect ? "var(--green)" : "var(--red)", letterSpacing:"0.1px" }}>
+                      {isCorrect ? "Correct" : (current.phase === "recog" ? word.en : word.nl)}
+                      {isCorrect && current.phase === "recog" && (() => {
+                        const u = cardsRef.current?.find(c => c.nl === current.nl);
+                        if (u?.phase === "prod") return <span style={{ color:"var(--violet)", fontWeight:400 }}> — now type it</span>;
+                        return <span style={{ color:"var(--text-2)", fontWeight:400 }}> — coming back</span>;
+                      })()}
+                      {isCorrect && current.phase === "prod" && (() => {
+                        const u = cardsRef.current?.find(c => c.nl === current.nl);
+                        if (u) return <span style={{ color:"var(--text-2)", fontWeight:400 }}> — back in {u.interval} day{u.interval !== 1 ? "s" : ""}</span>;
+                      })()}
+                    </p>
+                    {!isCorrect && (
+                      <button onClick={handleNextCard}
+                        style={{ background:"rgba(255,255,255,0.07)", color:"var(--text)", border:"1px solid var(--border)", borderRadius:12, padding:"11px 32px", fontSize:14, cursor:"pointer", fontWeight:500, fontFamily:"inherit" }}>
+                        Continue →
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
+            ) : null}
 
-              {/* MCQ options */}
-              {current.phase === "recog" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                  {options.map((opt, i) => {
-                    const isAnswer = selected !== null && opt === word.en;
-                    const isWrong  = selected !== null && opt === selected && opt !== word.en;
-                    return (
-                      <button key={i} onClick={() => handleRecog(opt)}
-                        className={`btn-option${selected !== null ? " answered" : ""}`}
-                        style={{
-                          background: isAnswer ? "rgba(34,197,94,0.13)" : isWrong ? "rgba(239,68,68,0.11)" : "var(--bg-elevated)",
-                          border:     "1px solid " + (isAnswer ? "rgba(34,197,94,0.45)" : isWrong ? "rgba(239,68,68,0.45)" : "var(--border-primary)"),
-                          borderLeft: "3px solid " + (isAnswer ? "#22c55e" : isWrong ? "#ef4444" : "transparent"),
-                          borderRadius: 14, padding: "14px 16px",
-                          display: "flex", alignItems: "center", gap: 14,
-                          width: "100%", textAlign: "left",
-                        }}>
-                        <span style={{
-                          width: 30, height: 30, borderRadius: "50%", flexShrink: 0,
-                          display: "flex", alignItems: "center", justifyContent: "center",
-                          background: isAnswer ? "#22c55e" : isWrong ? "#ef4444" : "var(--bg-primary)",
-                          color: isAnswer || isWrong ? "#fff" : "var(--text-tertiary)",
-                          fontSize: 12, fontWeight: 700,
-                        }}>
-                          {String.fromCharCode(65 + i)}
-                        </span>
-                        <span style={{ fontSize: 15, color: isAnswer ? "#4ade80" : isWrong ? "#f87171" : "var(--text-primary)", fontWeight: isAnswer ? 600 : 400 }}>
-                          {opt}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* Production */}
-              {current.phase === "prod" && (
-                <div>
-                  <input ref={inputRef} value={typed}
-                    onChange={e => setTyped(e.target.value)}
-                    onKeyDown={e => { if (e.key === "Enter" && !submitted) handleProd(); }}
-                    disabled={submitted}
-                    className="prod-input"
-                    placeholder="Type Dutch word…"
-                    style={{
-                      width: "100%", padding: "16px 18px", fontSize: 20,
-                      borderRadius: 14,
-                      border: "2px solid " + (submitted ? (isCorrect ? "#22c55e" : "#ef4444") : "var(--border-primary)"),
-                      background: submitted ? (isCorrect ? "rgba(34,197,94,0.12)" : "rgba(239,68,68,0.10)") : "var(--bg-elevated)",
-                      color: submitted ? (isCorrect ? "#4ade80" : "#f87171") : "var(--text-primary)",
-                      fontWeight: 700, outline: "none", letterSpacing: "-0.3px",
-                      transition: "border-color 0.15s, background 0.15s",
-                    }}
-                  />
-                  {!submitted && (
-                    <button onClick={handleProd}
-                      style={{ marginTop: 10, width: "100%", background: "#f59e0b", color: "#fff", border: "none", borderRadius: 13, padding: "14px", fontSize: 15, cursor: "pointer", fontWeight: 700, letterSpacing: "-0.2px" }}>
-                      Check ↵
-                    </button>
-                  )}
-                  {submitted && !isCorrect && (
-                    <div style={{ marginTop: 10, padding: "13px 16px", background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: 12, fontSize: 14, color: "#fbbf24" }}>
-                      Correct answer: <strong>{word.nl}</strong>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Feedback */}
-              {(selected !== null || submitted) && (
-                <div style={{ marginTop: 16, textAlign: "center" }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, marginBottom: isCorrect ? 0 : 14, color: isCorrect ? "#22c55e" : "#ef4444", letterSpacing: "0.2px" }}>
-                    {isCorrect ? "✓ Correct" : `✗ ${current.phase === "recog" ? `"${word.en}"` : `"${word.nl}"`}`}
-                    {isCorrect && current.phase === "recog" && (() => {
-                      const updated = cardsRef.current?.find(c => c.nl === current.nl);
-                      if (updated?.phase === "prod") return <span style={{ color: "#818cf8", fontWeight: 500 }}> · now type it 🎓</span>;
-                      return <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}> · coming back shortly</span>;
-                    })()}
-                    {isCorrect && current.phase === "prod" && (() => {
-                      const updated = cardsRef.current?.find(c => c.nl === current.nl);
-                      if (updated) return <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}> · back in {updated.interval} day{updated.interval !== 1 ? "s" : ""}</span>;
-                    })()}
-                  </div>
-                  {!isCorrect && (
-                    <button onClick={handleNextCard}
-                      style={{ background: "#6366f1", color: "#fff", border: "none", borderRadius: 12, padding: "12px 36px", fontSize: 15, cursor: "pointer", fontWeight: 700 }}>
-                      Next →
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          ) : null}
-
-          {!sessionDone && (
-            <button onClick={handleReset} style={{ marginTop: 36, background: "transparent", color: "var(--text-tertiary)", border: "none", fontSize: 11, cursor: "pointer", textDecoration: "underline", opacity: 0.5 }}>
-              Reset all progress
-            </button>
-          )}
+            {!sessionDone && (
+              <button onClick={handleReset} style={{ display:"block", margin:"40px auto 0", background:"transparent", color:"var(--text-3)", border:"none", fontSize:11, cursor:"pointer", fontFamily:"inherit", opacity:0.6 }}>
+                reset progress
+              </button>
+            )}
+          </div>
         </div>
       );
     }
