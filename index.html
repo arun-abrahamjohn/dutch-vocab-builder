@@ -267,11 +267,13 @@
             if (correct) {
               const newStreak = c.recogStreak + 1;
               if (newStreak >= 2) {
+                // Graduate: production attempt happens in this session, SM-2 review tomorrow
                 return { ...c, recogStreak: newStreak, phase: "prod", interval: 1, dueDate: addDays(today(), 1) };
               }
-              return { ...c, recogStreak: newStreak, dueDate: addDays(today(), 1) };
+              // First pass: keep dueDate=today so it re-enters if session is interrupted
+              return { ...c, recogStreak: newStreak, dueDate: today() };
             } else {
-              return { ...c, recogStreak: 0, dueDate: addDays(today(), 1) };
+              return { ...c, recogStreak: 0, dueDate: today() };
             }
           });
           persist(updated);
@@ -279,10 +281,14 @@
             const next = q.slice(1);
             const card = updated.find(c => c.nl === current.nl);
             if (!correct) {
-              next.splice(Math.min(4, next.length), 0, card);
-            } else if (card?.phase === "prod") {
-              // Just graduated — add a production attempt later this session
-              next.splice(Math.min(4, next.length), 0, card);
+              // Wrong: back in a few cards, streak reset
+              next.splice(Math.min(3, next.length), 0, card);
+            } else if (card.recogStreak === 1) {
+              // First recog passed: re-queue for second MCQ a few cards later
+              next.splice(Math.min(5, next.length), 0, card);
+            } else if (card.phase === "prod") {
+              // Graduated: re-queue for immediate production attempt
+              next.splice(Math.min(5, next.length), 0, card);
             }
             return next;
           });
@@ -533,8 +539,8 @@
                     {isCorrect ? "✓ Correct" : `✗ ${current.phase === "recog" ? `"${word.en}"` : `"${word.nl}"`}`}
                     {isCorrect && current.phase === "recog" && (() => {
                       const updated = cardsRef.current?.find(c => c.nl === current.nl);
-                      if (updated?.phase === "prod") return <span style={{ color: "#818cf8", fontWeight: 500 }}> · promoted to production 🎓</span>;
-                      return <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}> · one more recognition to go</span>;
+                      if (updated?.phase === "prod") return <span style={{ color: "#818cf8", fontWeight: 500 }}> · now type it 🎓</span>;
+                      return <span style={{ color: "var(--text-tertiary)", fontWeight: 400 }}> · coming back shortly</span>;
                     })()}
                     {isCorrect && current.phase === "prod" && (() => {
                       const updated = cardsRef.current?.find(c => c.nl === current.nl);
