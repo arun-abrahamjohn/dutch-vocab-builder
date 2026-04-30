@@ -2,6 +2,9 @@
 
 A single-file, offline-capable Dutch flashcard app using the SM-2 spaced repetition algorithm. Open `index.html` in any browser — no build step, no server required.
 
+<img width="643" height="695" alt="image" src="https://github.com/user-attachments/assets/cf015918-e3a1-4efa-b9bb-49b0b6668041" />
+
+
 ## How it works
 
 Cards move through two phases:
